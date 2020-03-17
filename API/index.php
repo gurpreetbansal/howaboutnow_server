@@ -10,7 +10,7 @@
 			login();
 		}
 		else
-		if ($_GET["p"]=="login") {
+		if ($_GET["p"]=="forgot_password") {
 			forgotPassword();
 		}
 		else
@@ -21,7 +21,7 @@
 		else
 		if($_GET["p"]=="getUserInfo")
 		{
-			getUserInfo();
+			getUserProfile();
 		}
 		else
 		if($_GET["p"]=="uploadImages")
@@ -181,6 +181,10 @@
 		{
 			mylikies();
 		}
+	    else
+	    if($_GET["p"] =="question_list") {
+			questionList();
+		}
 	
 	}
 	else
@@ -188,8 +192,7 @@
 		echo"Not Found";
 
 	}
-	
-	
+
 	function getAge($dob)
 	{
 	    
@@ -269,7 +272,7 @@
     			$qrry_1.="'".$device."',";
     			$qrry_1.="'".$device_token."',";
     			$qrry_1.="'".$email."',";
-    			$qrry_1.="'".$password."'";
+    			$qrry_1.="'".sha1($password)."'";
     			$qrry_1.=")";
 
 //    			var_dump($qrry_1); die();
@@ -326,10 +329,11 @@
 
 	function login()
     {
-
         require_once("config.php");
         $input = @file_get_contents("php://input");
         $event_json = json_decode($input,true);
+
+
 		if (isset($event_json['email']) && isset($event_json['password'])) {
 			$device_token = htmlspecialchars_decode(stripslashes($event_json['device_token']));
 			$lat = htmlspecialchars_decode(stripslashes($event_json['lat']));
@@ -338,21 +342,23 @@
 			$email = htmlspecialchars_decode(stripslashes($event_json['email']));
 			$password = htmlspecialchars_decode(stripslashes($event_json['password']));
 
-			$log_in = "select * from users where email='" . $email . "' AND  password='" . $password . "'";
+			$log_in = "select * from users where email='" . $email . "' AND  password='" . sha1($password) . "'";
 			$log_in_rs = mysqli_query($conn, $log_in);
+
 
 			if (mysqli_num_rows($log_in_rs)) {
 				$rd = mysqli_fetch_object($log_in_rs);
-		//			    $age="".calculateAge($rd->birthday)."";
-
 				// update user data
 
+				$updateData = "UPDATE users SET `lat`='".$lat."', `long`='".$lng."', `device_token`='".$device_token."', `device`='".$device."' where id=". $rd->id;
+				$update = mysqli_query($conn, $updateData);
 
 				$array_out = array();
 				$array_out[] =
 					//array("code" => "200");
 					array(
 						"action" => "login",
+						"user_id" => $rd->id,
 						"first_name" => $rd->first_name,
 						"last_name" => $rd->last_name,
 						"device_token" => $device_token,
@@ -397,7 +403,35 @@
 			$log_in = "select * from users where email='" . $email . "'";
 			$log_in_rs = mysqli_query($conn, $log_in);
 			if (mysqli_num_rows($log_in_rs)) {
+				$rd = mysqli_fetch_object($log_in_rs);
 				// Email Changed Password to user.
+				$password = random_strings(8);
+				$sentMail = sendEmail($password, $email);
+
+				if($sentMail) {
+					$updateData = "UPDATE users SET `password`='".sha1($password)."' where id=". $rd->id;
+					$update = mysqli_query($conn, $updateData);
+
+					$array_out = array();
+
+					$array_out[] =
+						array(
+							"response" =>" An updated passwordword has been sent to your email please check");
+
+					$output=array( "code" => "200", "msg" => $array_out);
+					print_r(json_encode($output, true));
+				} else {
+					$array_out = array();
+
+					$array_out[] =
+						array(
+							"response" =>"Issue encountered while sendoing a mail");
+
+					$output=array( "code" => "201", "msg" => $array_out);
+					print_r(json_encode($output, true));
+				}
+
+
 			} else {
 				$array_out = array();
 
@@ -419,14 +453,37 @@
 		}
 	}
 
-	function getUserProfile() {
+	function questionList() {
 		require_once("config.php");
 		$input = @file_get_contents("php://input");
 		$event_json = json_decode($input,true);
 
-		if(isset($event_json['user_id']))
-		{
+		if(isset($event_json['user_id'])) {
+			$quests = "select * from question_list";
+			$list = mysqli_query($conn, $quests);
+			if (mysqli_num_rows($list)) {
+				$rd = mysqli_fetch_all($list);
+//				print_r($rd); die();
+				$array_out = array();
+				foreach($rd as $r) {
+//					print_r($r); die();/
+					$array_out[] = array (
+						'ques_id' => $r[0],
+						'question' => $r[1]
+					);
+				}
+				$output=array( "code" => "200", "msg" => $array_out);
+				print_r(json_encode($output, true));
+			} else {
+				$array_out = array();
 
+				$array_out[] =
+					array(
+						"response" =>"problem in question fetch");
+
+				$output=array( "code" => "201", "msg" => $array_out);
+				print_r(json_encode($output, true));
+			}
 		} else {
 			$array_out = array();
 			$array_out[] =
@@ -436,6 +493,189 @@
 			$output = array("code" => "201", "msg" => $array_out);
 			print_r(json_encode($output, true));
 		}
+	}
+
+	function getUserProfile()
+    {
+        require_once("config.php");
+        $input = @file_get_contents("php://input");
+        $event_json = json_decode($input, true);
+
+        if (isset($event_json['user_id'])) {
+
+            $user_id = htmlspecialchars(strip_tags($event_json['user_id'], ENT_QUOTES));
+
+            $qrry_1 = "select * from users WHERE id ='" . $user_id . "' ";
+            $log_in_rs = mysqli_query($conn, $qrry_1);
+
+            if (mysqli_num_rows($log_in_rs)) {
+
+
+                $rd = mysqli_fetch_object($log_in_rs);
+
+                // get profile answers
+				$query = "SELECT ua.answer, ql.question, ql.id FROM `user_answer` as ua right join question_list as ql ON ql.id = ua.ques_id AND ua.user_id =".$user_id;
+				$query_list = mysqli_query($conn, $query);
+
+				$answerData = mysqli_fetch_all($query_list,MYSQLI_ASSOC);
+
+                $birthDate = $rd->birthday;
+                //explode the date to get month, day and year
+                $birthDate = explode("/", $birthDate);
+                //get age from date or birthdate
+                $age = (date("md", date("U", @mktime(0, 0, 0, $birthDate[0], $birthDate[1], $birthDate[2]))) > date("md")
+                    ? ((date("Y") - $birthDate[2]) - 1)
+                    : (date("Y") - $birthDate[2]));
+
+
+                $array_out = array();
+
+                $array_out[] =
+                    array(
+                        "about_me" => $rd->about_me,
+                        "job_title" => $rd->job_title,
+                        "gender" => $rd->gender,
+                        "birthday" => $rd->birthday,
+                        "age" => $age,
+                        "company" => $rd->company,
+                        "school" => $rd->school,
+                        "first_name" => $rd->first_name,
+                        "last_name" => $rd->last_name,
+                        "user_answer" => $answerData,
+                        "image1" => htmlspecialchars_decode(stripslashes($rd->image1)),
+                        "image2" => htmlspecialchars_decode(stripslashes($rd->image2)),
+                        "image3" => htmlspecialchars_decode(stripslashes($rd->image3)),
+                        "image4" => htmlspecialchars_decode(stripslashes($rd->image4)),
+                        "image5" => htmlspecialchars_decode(stripslashes($rd->image5)),
+                        "image6" => htmlspecialchars_decode(stripslashes($rd->image6)),
+                    );
+
+                $output = array("code" => "200", "msg" => $array_out);
+                print_r(json_encode($output, true));
+
+            } else {
+                $array_out = array();
+                $array_out[] =
+                    array(
+                        "response" => "Json Param are missing");
+
+                $output = array("code" => "201", "msg" => $array_out);
+                print_r(json_encode($output, true));
+            }
+        }
+    }
+
+    function edit_profile() {
+	require_once("config.php");
+	$input = @file_get_contents("php://input");
+	$event_json = json_decode($input,true);
+	//print_r($event_json);
+	//0= owner  1= company 2= ind mechanic
+
+	if(isset($event_json['user_id']) && isset($event_json['first_name']) && isset($event_json['last_name']))
+	{
+		$user_id=htmlspecialchars(strip_tags($event_json['user_id'] , ENT_QUOTES));
+		$about_me=htmlspecialchars(strip_tags($event_json['about_me'] , ENT_QUOTES));
+		$job_title=htmlspecialchars(strip_tags($event_json['job_title'] , ENT_QUOTES));
+		$company=htmlspecialchars(strip_tags($event_json['company'] , ENT_QUOTES));
+		$school=htmlspecialchars(strip_tags($event_json['school'] , ENT_QUOTES));
+
+		$gender=htmlspecialchars(strip_tags(strtolower($event_json['gender']) , ENT_QUOTES));
+		$birthday=htmlspecialchars(strip_tags($event_json['birthday'] , ENT_QUOTES));
+		$first_name=htmlspecialchars(strip_tags($event_json['first_name'] , ENT_QUOTES));
+		$last_name=htmlspecialchars(strip_tags($event_json['last_name'] , ENT_QUOTES));
+		$question_data=$event_json['question_data'];
+
+		$age=calculateAge($birthday);
+
+		if(count($question_data)) {
+			foreach($question_data as $qd) {
+				$checkTable = "Select * from user_answer where user_id = ".$user_id." AND quest_id =".$qd['ques_id'];
+				$log_in_rs = mysqli_query($conn,$checkTable);
+				if(mysqli_num_rows($log_in_rs)) {
+					// update data
+					$qrry_up = "UPDATE user_answer SET answer='".$qd['answer']."' WHERE user_id = ".$user_id." AND quest_id =".$qd['ques_id'];
+					mysqli_query($conn,$qrry_up);
+				} else {
+					// insert Data
+					$qrry_ins="insert into user_answer(`ques_id`,`user_id`,`answer`)values(";
+					$qrry_ins.="'".$qd['ques_id']."',";
+					$qrry_ins.="'".$user_id."',";
+					$qrry_ins.="'".$qd['answer']."',";
+					$qrry_ins.=")";
+					mysqli_query($conn,$qrry_ins);
+				}
+			}
+		}
+
+		$qrry_1="update users SET about_me ='".$about_me."' , job_title ='".$job_title."', birthday ='".$birthday."' , age ='".$age."' , company ='".$company."' , school ='".$school."' , gender ='".$gender."'  WHERE id ='".$user_id."' ";
+
+		if(mysqli_query($conn,$qrry_1))
+		{
+			$array_out = array();
+
+			$qrry_1="select * from users WHERE id ='".$user_id."' ";
+			$log_in_rs=mysqli_query($conn,$qrry_1);
+
+			if(mysqli_num_rows($log_in_rs))
+			{
+
+
+				$rd=mysqli_fetch_object($log_in_rs);
+
+				$birthDate = $rd->birthday;
+				//explode the date to get month, day and year
+				$birthDate = explode("/", $birthDate);
+				//get age from date or birthdate
+				$age = (date("md", date("U", @mktime(0, 0, 0, $birthDate[0], $birthDate[1], $birthDate[2]))) > date("md")
+					? ((date("Y") - $birthDate[2]) - 1)
+					: (date("Y") - $birthDate[2]));
+
+
+				$array_out = array();
+
+				$array_out[] =
+					array(
+						"about_me" => $rd->about_me,
+						"job_title" => $rd->job_title,
+						"gender" => $rd->gender,
+						"birthday" => $rd->birthday,
+						"age" => $age,
+						"company" => $rd->company,
+						"school" => $rd->school,
+						"first_name" => $rd->first_name,
+						"last_name" => $rd->last_name,
+					);
+
+				$output=array( "code" => "200", "msg" => $array_out);
+				print_r(json_encode($output, true));
+			}
+		}
+		else
+		{
+			$array_out = array();
+
+			$array_out[] =
+				array(
+					"response" =>"problem in updating");
+
+			$output=array( "code" => "201", "msg" => $array_out);
+			print_r(json_encode($output, true));
+		}
+
+	}
+	else
+	{
+		$array_out = array();
+
+		$array_out[] =
+			array(
+				"response" =>"Json Parem are missing");
+
+		$output=array( "code" => "201", "msg" => $array_out);
+		print_r(json_encode($output, true));
+	}
+
 	}
 
 	function flat_user()
@@ -481,196 +721,6 @@
         		print_r(json_encode($output, true));
 			}
 			
-			
-			
-		}
-		else
-		{
-			$array_out = array();
-					
-			 $array_out[] = 
-				array(
-				"response" =>"Json Parem are missing");
-			
-			$output=array( "code" => "201", "msg" => $array_out);
-			print_r(json_encode($output, true));
-		}
-	    
-	}
-	
-	function edit_profile()
-	{
-	    require_once("config.php");
-	    $input = @file_get_contents("php://input");
-	    $event_json = json_decode($input,true);
-		//print_r($event_json);
-		//0= owner  1= company 2= ind mechanic
-		
-		if(isset($event_json['fb_id']) && isset($event_json['about_me']))
-		{
-			$fb_id=htmlspecialchars(strip_tags($event_json['fb_id'] , ENT_QUOTES));
-			$about_me=htmlspecialchars(strip_tags($event_json['about_me'] , ENT_QUOTES));
-			$job_title=htmlspecialchars(strip_tags($event_json['job_title'] , ENT_QUOTES));
-			$company=htmlspecialchars(strip_tags($event_json['company'] , ENT_QUOTES));
-			$school=htmlspecialchars(strip_tags($event_json['school'] , ENT_QUOTES));
-			
-			$image1=stripslashes(strip_tags($event_json['image1']));
-			$image2=stripslashes(strip_tags($event_json['image2']));
-			$image3=stripslashes(strip_tags($event_json['image3']));
-			$image4=stripslashes(strip_tags($event_json['image4']));
-			$image5=stripslashes(strip_tags($event_json['image5']));
-			$image6=stripslashes(strip_tags($event_json['image6']));
-		    $gender=htmlspecialchars(strip_tags(strtolower($event_json['gender']) , ENT_QUOTES));
-		    $birthday=htmlspecialchars(strip_tags($event_json['birthday'] , ENT_QUOTES));
-			
-			$age=calculateAge($birthday);
-
-			$qrry_1="update users SET about_me ='".$about_me."' , job_title ='".$job_title."', birthday ='".$birthday."' , age ='".$age."' , company ='".$company."' , school ='".$school."'  , image1 ='".$image1."' , image2 ='".$image2."' , image3 ='".$image3."' , image4 ='".$image4."' , image5 ='".$image5."' , image6 ='".$image6."', gender ='".$gender."'  WHERE fb_id ='".$fb_id."' ";
-
-			if(mysqli_query($conn,$qrry_1))
-			{
-			    $array_out = array();
-				 
-				$qrry_1="select * from users WHERE fb_id ='".$fb_id."' ";
-    			$log_in_rs=mysqli_query($conn,$qrry_1);
-    			
-    			if(mysqli_num_rows($log_in_rs))
-    			{   
-    			    
-                    
-    			    $rd=mysqli_fetch_object($log_in_rs);
-    			    
-    			    $birthDate = $rd->birthday;
-                    //explode the date to get month, day and year
-                      $birthDate = explode("/", $birthDate);
-                      //get age from date or birthdate
-                      $age = (date("md", date("U", @mktime(0, 0, 0, $birthDate[0], $birthDate[1], $birthDate[2]))) > date("md")
-                        ? ((date("Y") - $birthDate[2]) - 1)
-                        : (date("Y") - $birthDate[2]));
-                        
-                        
-    			    $array_out = array();
-    					
-            		 $array_out[] = 
-            			array(
-            			"about_me" => $rd->about_me,
-            			"job_title" => $rd->job_title,
-            			"gender" => $rd->gender,
-            			"birthday" => $rd->birthday,
-            			"age" => $age,
-            			"company" => $rd->company,
-            			"school" => $rd->school,
-            			"first_name" => $rd->first_name,
-            			"last_name" => $rd->last_name,
-            			"image1" => htmlspecialchars_decode(stripslashes($rd->image1)),
-            			"image2" => htmlspecialchars_decode(stripslashes($rd->image2)),
-            			"image3" => htmlspecialchars_decode(stripslashes($rd->image3)),
-            			"image4" => htmlspecialchars_decode(stripslashes($rd->image4)),
-            			"image5" => htmlspecialchars_decode(stripslashes($rd->image5)),
-            			"image6" => htmlspecialchars_decode(stripslashes($rd->image6)),
-            			);
-            		
-            		$output=array( "code" => "200", "msg" => $array_out);
-            		print_r(json_encode($output, true));
-    			}
-			
-        		
-			}
-			else
-			{
-			    $array_out = array();
-					
-        		 $array_out[] = 
-        			array(
-        			"response" =>"problem in updating");
-        		
-        		$output=array( "code" => "201", "msg" => $array_out);
-        		print_r(json_encode($output, true));
-			}
-			
-		}
-		else
-		{
-			$array_out = array();
-					
-			 $array_out[] = 
-				array(
-				"response" =>"Json Parem are missing");
-			
-			$output=array( "code" => "201", "msg" => $array_out);
-			print_r(json_encode($output, true));
-		}
-	    
-	}
-
-	function getUserInfo()
-	{
-	    
-	    require_once("config.php");
-	    $input = @file_get_contents("php://input");
-	    $event_json = json_decode($input,true);
-		//print_r($event_json);
-		//0= owner  1= company 2= ind mechanic
-		
-		if(isset($event_json['fb_id']))
-		{
-			$fb_id=htmlspecialchars(strip_tags($event_json['fb_id'] , ENT_QUOTES));
-			//$about_me=htmlspecialchars(strip_tags($event_json['about_me'] , ENT_QUOTES));
-			
-			
-			$qrry_1="select * from users WHERE fb_id ='".$fb_id."' ";
-			$log_in_rs=mysqli_query($conn,$qrry_1);
-			
-			if(mysqli_num_rows($log_in_rs))
-			{   
-			    
-                
-			    $rd=mysqli_fetch_object($log_in_rs);
-			    
-			    $birthDate = $rd->birthday;
-                //explode the date to get month, day and year
-                  $birthDate = explode("/", $birthDate);
-                  //get age from date or birthdate
-                  $age = (date("md", date("U", @mktime(0, 0, 0, $birthDate[0], $birthDate[1], $birthDate[2]))) > date("md")
-                    ? ((date("Y") - $birthDate[2]) - 1)
-                    : (date("Y") - $birthDate[2]));
-                    
-                    
-			    $array_out = array();
-					
-        		 $array_out[] = 
-        			array(
-        			"about_me" => $rd->about_me,
-        			"job_title" => $rd->job_title,
-        			"gender" => $rd->gender,
-        			"birthday" => $rd->birthday,
-        			"age" => $age,
-        			"company" => $rd->company,
-        			"school" => $rd->school,
-        			"first_name" => $rd->first_name,
-        			"last_name" => $rd->last_name,
-        			"image1" => htmlspecialchars_decode(stripslashes($rd->image1)),
-        			"image2" => htmlspecialchars_decode(stripslashes($rd->image2)),
-        			"image3" => htmlspecialchars_decode(stripslashes($rd->image3)),
-        			"image4" => htmlspecialchars_decode(stripslashes($rd->image4)),
-        			"image5" => htmlspecialchars_decode(stripslashes($rd->image5)),
-        			"image6" => htmlspecialchars_decode(stripslashes($rd->image6)),
-        			);
-        		
-        		$output=array( "code" => "200", "msg" => $array_out);
-        		print_r(json_encode($output, true));
-			}
-			else
-			{
-			    $array_out = array();
-					
-        		 $array_out[] = 
-        			array(
-        			"response" =>"problem in updating");
-        		
-        		$output=array( "code" => "201", "msg" => $array_out);
-        		print_r(json_encode($output, true));
-			}
 			
 			
 		}
@@ -3050,6 +3100,50 @@
 			print_r(json_encode($output, true));
 		}
 	}
-	  
-?>
 
+	function sendEmail($password,$email) {
+		require_once "../vendor/autoload.php";
+
+		//PHPMailer Object
+		$mail = new \PHPMailer\PHPMailer\PHPMailer();
+
+		$mail->SMTPDebug  = 1;
+		$mail->SMTPAuth   = TRUE;
+		$mail->SMTPSecure = "tls";
+		$mail->Port       = 587;
+		$mail->Host       = "smtp.sendgrid.net";
+		$mail->Username   = "piyush-imark";
+		$mail->Password   = "cognoscenti123@";
+
+		//From email address and name
+		$mail->From = "no-reply@imarkinfotech.com";
+		$mail->FromName = "IMARK INFOTECH Pvt. Ltd.";
+
+		//To address and name
+		$mail->addAddress($email);
+
+		//Send HTML or Plain Text email
+		$mail->isHTML(true);
+
+		$mail->Subject = "Forgot Password";
+		$mail->Body = "<i>Password: $password</i>";
+
+		return $mail->send();
+
+//		if(!$mail->send())
+//		{
+//			echo "Mailer Error: " . $mail->ErrorInfo;
+//		}
+//		else
+//		{
+//			echo "Message has been sent successfully";
+//		}
+	}
+
+	function random_strings($length_of_string)
+	{
+		$str_result = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+		return substr(str_shuffle($str_result),0, $length_of_string);
+	}
+
+?>
