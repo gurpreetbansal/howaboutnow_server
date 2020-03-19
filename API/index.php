@@ -24,6 +24,10 @@
 			getUserProfile();
 		}
 		else
+		if($_GET["p"]=="editImage") {
+			edit_images();
+		}
+		else
 		if($_GET["p"]=="uploadImages")
 		{
 			uploadImages();
@@ -246,7 +250,6 @@
 
 		if ((isset($event_json['first_name']) && isset($event_json['last_name']) && isset($event_json['email'])))
 		{
-//			$fb_id=htmlspecialchars(strip_tags($event_json['fb_id'] , ENT_QUOTES));
 			$first_name=htmlspecialchars(strip_tags($event_json['first_name'] , ENT_QUOTES));
 			$last_name=htmlspecialchars(strip_tags($event_json['last_name'] , ENT_QUOTES));
 			$device_token=htmlspecialchars_decode(stripslashes($event_json['device_token']));
@@ -275,42 +278,29 @@
     			$qrry_1.="'".sha1($password)."'";
     			$qrry_1.=")";
 
-//    			var_dump($qrry_1); die();
-    			if(mysqli_query($conn,$qrry_1))
+    			if($m = mysqli_query($conn,$qrry_1))
     			{
-
-//				     $age="".calculateAge($birthday)."";
     				 $array_out = array();
     				 $array_out[] =
-    					//array("code" => "200");
     					array(
-    						/*"fb_id" => $fb_id,*/
     						"action" => "signup",
-//    						"image1" => $image1,
     						"first_name" => $first_name,
     						"last_name" => $last_name,
-//    						"age" => $age,
-//					    	"birthday" => $birthday,
-//    						"gender" => $gender,
 							"device_token" => $device_token,
 							"device" => $device,
 							"lat" => $lat,
 							"lng" => $lng,
 							 "email" => $email,
-							 "password" => $password
+							 "password" => $password,
+						     "user_id" => mysqli_insert_id($conn)
     					);
-
     				$output=array( "code" => "200", "msg" => $array_out);
     				print_r(json_encode($output, true));
     			}
     			else
     			{
-					//echo mysqli_error();
 					$array_out = array();
-
-					$array_out[] =
-						array(
-							"response" =>"problem in signup");
+					$array_out[] = array("response" =>"problem in signup");
 
 					$output=array( "code" => "201", "msg" => $array_out);
 					print_r(json_encode($output, true));
@@ -603,6 +593,7 @@
 					$qrry_ins.="'".$user_id."',";
 					$qrry_ins.="'".$qd['answer']."',";
 					$qrry_ins.=")";
+					var_dump($qrry_ins);
 					mysqli_query($conn,$qrry_ins);
 				}
 			}
@@ -676,6 +667,38 @@
 		print_r(json_encode($output, true));
 	}
 
+	}
+
+	function edit_images() {
+		require_once("config.php");
+		$input = @file_get_contents("php://input");
+		$event_json = json_decode($input,true);
+
+		foreach($_FILES as $k => $f) {
+			if($f['size'] > 0) {
+				$target_path = "../uploads/".$_POST['user_id']."/";
+				if (!is_dir($target_path)) {
+					mkdir($target_path, 0777);
+				}
+				if(move_uploaded_file($f['tmp_name'], $target_path)) {
+					$qrry_1="UPDATE users SET `$k`=".$f['tmp_name'];
+					mysqli_query($conn,$qrry_1);
+				} else{
+					$array_out = array();
+					$array_out[] = array("response" =>"File upload failed");
+					$output=array( "code" => "201", "msg" => $array_out);
+					print_r(json_encode($output, true)); exit();
+				}
+			}
+		}
+
+		$array_out = array();
+		$array_out[] =
+			array(
+				"response" =>"Successfully uploaded");
+
+		$output=array( "code" => "200", "msg" => $array_out);
+		print_r(json_encode($output, true));
 	}
 
 	function flat_user()
