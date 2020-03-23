@@ -675,27 +675,30 @@
 		$event_json = json_decode($input,true);
 
 		foreach($_FILES as $k => $f) {
-			if($f['size'] > 0) {
-				$target_path = "../uploads/".$_POST['user_id']."/";
+			if ($f['size'] > 0) {
+				$target_path = "../uploads/" . $_POST['user_id'] . "/";
+//				var_dump($target_path); die();
 				if (!is_dir($target_path)) {
 					mkdir($target_path, 0777);
 				}
-				if(move_uploaded_file($f['tmp_name'], $target_path)) {
-					$qrry_1="UPDATE users SET `$k`=".$f['tmp_name'];
-					mysqli_query($conn,$qrry_1);
-				} else{
+
+				$target_path = $target_path . basename($f['name']);
+				if (move_uploaded_file($f['tmp_name'], $target_path)) {
+					$qrry_1 = "UPDATE users SET `$k`='" . $f['name'] . "' Where id = " . $_POST['user_id'];
+					mysqli_query($conn, $qrry_1);
+				} else {
 					$array_out = array();
-					$array_out[] = array("response" =>"File upload failed");
-					$output=array( "code" => "201", "msg" => $array_out);
-					print_r(json_encode($output, true)); exit();
+					$array_out[] = array("response" => "File upload failed");
+					$output = array("code" => "201", "msg" => $array_out);
+					print_r(json_encode($output, true));
+					exit();
 				}
 			}
 		}
 
 		$array_out = array();
 		$array_out[] =
-			array(
-				"response" =>"Successfully uploaded");
+			array("response" =>"Successfully uploaded");
 
 		$output=array( "code" => "200", "msg" => $array_out);
 		print_r(json_encode($output, true));
@@ -1039,190 +1042,184 @@
 		//print_r($event_json);
 		//0= owner  1= company 2= ind mechanic
         
-		if(isset($event_json['fb_id']) && isset($event_json['lat_long']) )
+		if(isset($event_json['user_id']) && isset($event_json['current_lat']) && isset($event_json['current_long']))
 		{
-		    
+
 			//disable user promoted
-				$query_promoted=mysqli_query($conn,"select * from users where promoted='1' order by promoted_mins ");
-				while($row_promoted=mysqli_fetch_array($query_promoted))
-				{
-					
-					$promoted_date=$row_promoted['promoted_date'];
-					$promoted_mins=$row_promoted['promoted_mins'];
-					$fb_id=$row_promoted['fb_id'];
-					
-					
-					$datetime1 = new DateTime();
-					$datetime2 = new DateTime($promoted_date);
-					$interval = $datetime1->diff($datetime2);
-					$min_ago = $interval->format('%i');
-					$hour_ago = $interval->format('%h');
-					//$elapsed;
-					
-					if($min_ago>$promoted_mins || $hour_ago>1)
-					{
-						$qrry_1="update users SET promoted='0' WHERE fb_id ='".$fb_id."' ";
-						mysqli_query($conn,$qrry_1);
-					}
-				 }
+//				$query_promoted=mysqli_query($conn,"select * from users where promoted='1' order by promoted_mins ");
+//				while($row_promoted=mysqli_fetch_array($query_promoted))
+//				{
+//
+//					$promoted_date=$row_promoted['promoted_date'];
+//					$promoted_mins=$row_promoted['promoted_mins'];
+//					$fb_id=$row_promoted['fb_id'];
+//
+//
+//					$datetime1 = new DateTime();
+//					$datetime2 = new DateTime($promoted_date);
+//					$interval = $datetime1->diff($datetime2);
+//					$min_ago = $interval->format('%i');
+//					$hour_ago = $interval->format('%h');
+//					//$elapsed;
+//
+//					if($min_ago>$promoted_mins || $hour_ago>1)
+//					{
+//						$qrry_1="update users SET promoted='0' WHERE fb_id ='".$fb_id."' ";
+//						mysqli_query($conn,$qrry_1);
+//					}
+//				 }
 			//disable user promoted
 
 		    //remove after fetch
-        	    
-    	    $headers = array(
-    		"Accept: application/json",
-    		"Content-Type: application/json"
-        	);
-        	
-        	$data = array();
-        	
-        	$ch = curl_init($firebaseDb_URL.'/.json');
-        	
-        	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
-        	curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-        	curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        	
-        	$return = curl_exec($ch);
-        	
-        	$json_data = json_decode($return, true);
-        	
-        	$datacount=@count($json_data);
-			if($datacount!="0")
-			{
-				foreach ($json_data as $key => $item) 
-				{
-					foreach ($item as $key1 => $item1)
-					{
-						
-					 
-						if(!isset($item1['fetch']))
-						{
-						   
-						   //print_r($item1['match']);
-    						 if($item1['match']=="false")
-    						 {
-    							 $match= "false";
-    						 }
-    						 
-    						 if($item1['match']=="true")
-    						 {
-    							 $match= "true";
-    						 }
-    						 
-    						 $effeted=$item1['effect'];
-    						 
-    						 
-							 
-							$qrry_1="select * from like_unlike where action_profile ='".$key."' and effect_profile ='".$key1."' ";
-							$log_in_rs=mysqli_query($conn,$qrry_1);
-							if(mysqli_num_rows($log_in_rs))
-							{
-							   mysqli_query($conn,"update like_unlike SET match_profile ='true' WHERE action_profile ='".$key."' and effect_profile ='".$key1."' ");
-							   //echo "update 1";
-							}
-							else
-							{
-								$qrry_1="insert into like_unlike(action_profile,effect_profile,action_type,match_profile,effected,created)values(";
-								$qrry_1.="'".$key."',";
-								$qrry_1.="'".$key1."',";
-								$qrry_1.="'".$item1['type']."',";
-								$qrry_1.="'".$match."',";
-								$qrry_1.="'".$effeted."',";
-								$qrry_1.="'".date('Y-m-d H:i:s', time())."'";
-								$qrry_1.=")";
-								if(mysqli_query($conn,$qrry_1))
-								{
-									if($item1['type']=="like" && $item1['effect']=="true")
-									{
-										$qrry_1="update users SET like_count = like_count+1 WHERE fb_id ='".$key1."' ";
-										if(mysqli_query($conn,$qrry_1))
-										{
-											//echo "udpate";
-										}
-										
-									 }
-									else
-									if($item1['type']=="dislike" && $item1['effect']=="true")
-									{
-										$qrry_1="update users SET dislike_count = dislike_count+1 WHERE fb_id ='".$key1."' ";
-										if(mysqli_query($conn,$qrry_1))
-										{
-											//echo "udpate";
-										}
-										
-										
-									}
-									
-								   
-								} 
-								
-								
-							}
-						 
-							
-						}
-						 
-						
-					}
-				}
-			}
-        	
-        	//Delete firebase db data after insert
-        	
-        	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
-        	curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-        	curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        	
-        	$return = curl_exec($ch);
-        	
-        	$json_data = json_decode($return, true);
-        	
-        	
-        	$curl_error = curl_error($ch);
-        	$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+//    	    $headers = array(
+//    		"Accept: application/json",
+//    		"Content-Type: application/json"
+//        	);
+//
+//        	$data = array();
+//
+//        	$ch = curl_init($firebaseDb_URL.'/.json');
+//
+//        	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+//        	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
+//        	curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+//        	curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+//
+//        	$return = curl_exec($ch);
+//
+//        	$json_data = json_decode($return, true);
+//
+//        	$datacount=@count($json_data);
+//			if($datacount!="0")
+//			{
+//				foreach ($json_data as $key => $item)
+//				{
+//					foreach ($item as $key1 => $item1)
+//					{
+//
+//
+//						if(!isset($item1['fetch']))
+//						{
+//
+//						   //print_r($item1['match']);
+//    						 if($item1['match']=="false")
+//    						 {
+//    							 $match= "false";
+//    						 }
+//
+//    						 if($item1['match']=="true")
+//    						 {
+//    							 $match= "true";
+//    						 }
+//
+//    						 $effeted=$item1['effect'];
+//
+//
+//
+//							$qrry_1="select * from like_unlike where action_profile ='".$key."' and effect_profile ='".$key1."' ";
+//							$log_in_rs=mysqli_query($conn,$qrry_1);
+//							if(mysqli_num_rows($log_in_rs))
+//							{
+//							   mysqli_query($conn,"update like_unlike SET match_profile ='true' WHERE action_profile ='".$key."' and effect_profile ='".$key1."' ");
+//							   //echo "update 1";
+//							}
+//							else
+//							{
+//								$qrry_1="insert into like_unlike(action_profile,effect_profile,action_type,match_profile,effected,created)values(";
+//								$qrry_1.="'".$key."',";
+//								$qrry_1.="'".$key1."',";
+//								$qrry_1.="'".$item1['type']."',";
+//								$qrry_1.="'".$match."',";
+//								$qrry_1.="'".$effeted."',";
+//								$qrry_1.="'".date('Y-m-d H:i:s', time())."'";
+//								$qrry_1.=")";
+//								if(mysqli_query($conn,$qrry_1))
+//								{
+//									if($item1['type']=="like" && $item1['effect']=="true")
+//									{
+//										$qrry_1="update users SET like_count = like_count+1 WHERE fb_id ='".$key1."' ";
+//										if(mysqli_query($conn,$qrry_1))
+//										{
+//											//echo "udpate";
+//										}
+//
+//									 }
+//									else
+//									if($item1['type']=="dislike" && $item1['effect']=="true")
+//									{
+//										$qrry_1="update users SET dislike_count = dislike_count+1 WHERE fb_id ='".$key1."' ";
+//										if(mysqli_query($conn,$qrry_1))
+//										{
+//											//echo "udpate";
+//										}
+//
+//
+//									}
+//
+//
+//								}
+//
+//
+//							}
+//
+//
+//						}
+//
+//
+//					}
+//				}
+//			}
+//
+//        	//Delete firebase db data after insert
+//
+//        	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+//        	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
+//        	curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+//        	curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+//
+//        	$return = curl_exec($ch);
+//
+//        	$json_data = json_decode($return, true);
+//
+//
+//        	$curl_error = curl_error($ch);
+//        	$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         	//end--------------------------------------------------------------------
         	
         	
-			$fb_id=htmlspecialchars(strip_tags($event_json['fb_id'] , ENT_QUOTES));
-			$lat_long=strip_tags($event_json['lat_long']);
-			
+			$user_id=htmlspecialchars(strip_tags($event_json['user_id'] , ENT_QUOTES));
+			$current_long=strip_tags($event_json['current_long']);
+			$current_lat=strip_tags($event_json['current_lat']);
+
 			$distance=strip_tags($event_json['distance']);
-			$age_range=strip_tags($event_json['age_range']);
+//			$age_range=strip_tags($event_json['age_range']);
 			$gender=strip_tags($event_json['gender']);
 			
 			$age_min =strip_tags($event_json['age_min']);
 			$age_max =strip_tags($event_json['age_max']);
-		    
-		    
-		    $version=strip_tags($event_json['version']);
-		    $device=strip_tags($event_json['device']);
 			
-			$purchased=strip_tags($event_json['purchased']);
+//			$purchased=strip_tags($event_json['purchased']);
 		    
 		    if($distance=="")
 		    {
 		        $distance="100000";
 		    }
-		    
-		    $mylocation=explode(",",$lat_long);
-			//
-			$qrry_1="update users SET lat_long ='".$lat_long."' , users.lat='".$mylocation[0]."' , users.long='".$mylocation[1]."' , version='".$version."' , device='".$device."' , device_token='".$device_token."' , purchased='".$purchased."'   WHERE fb_id ='".$fb_id."' ";
+
+			$qrry_1="update users SET users.lat='".$current_lat."' , users.long='".$current_long."' WHERE id ='".$user_id."' ";
 			if(mysqli_query($conn,$qrry_1))
 			{
 			    //6371  for km query
-			    $mylocation=explode(",",$lat_long);
 			    
 			    if($gender=="all")
 			    {
-			        $query=mysqli_query($conn,"SELECT *, ( 3959 * acos( cos( radians($mylocation[0]) ) * cos( radians( lat ) ) * cos( radians( users.long ) - radians($mylocation[1]) ) + sin( radians($mylocation[0]) ) * sin( radians( lat ) ) ) ) AS distance FROM users WHERE age BETWEEN $age_min AND $age_max and fb_id !='".$fb_id."' HAVING distance < $distance ORDER BY distance LIMIT 40");
-			        $promoted=mysqli_query($conn,"SELECT *, ( 3959 * acos( cos( radians($mylocation[0]) ) * cos( radians( lat ) ) * cos( radians( users.long ) - radians($mylocation[1]) ) + sin( radians($mylocation[0]) ) * sin( radians( lat ) ) ) ) AS distance FROM users WHERE age BETWEEN $age_min AND $age_max and fb_id !='".$fb_id."' and promoted='1' HAVING distance < $distance ORDER BY promoted LIMIT 5");
+			        $query=mysqli_query($conn,"SELECT *, ( 3959 * acos( cos( radians($current_lat) ) * cos( radians( lat ) ) * cos( radians( users.long ) - radians($current_long) ) + sin( radians($current_lat) ) * sin( radians( lat ) ) ) ) AS distance FROM users WHERE age BETWEEN $age_min AND $age_max and id !='".$user_id."' HAVING distance < $distance ORDER BY distance");
+//			        $promoted=mysqli_query($conn,"SELECT *, ( 3959 * acos( cos( radians($current_lat) ) * cos( radians( lat ) ) * cos( radians( users.long ) - radians($current_long) ) + sin( radians($current_lat) ) * sin( radians( lat ) ) ) ) AS distance FROM users WHERE age BETWEEN $age_min AND $age_max and id !='".$user_id."' HAVING distance < $distance ORDER BY $distance");
 			    }
 			    else
 			    {
-			        $query=mysqli_query($conn,"SELECT *, ( 3959 * acos( cos( radians($mylocation[0]) ) * cos( radians( lat ) ) * cos( radians( users.long ) - radians($mylocation[1]) ) + sin( radians($mylocation[0]) ) * sin( radians( lat ) ) ) ) AS distance FROM users WHERE gender = '$gender' AND age BETWEEN $age_min AND $age_max and fb_id !='".$fb_id."' HAVING distance < $distance ORDER BY distance LIMIT 40");
-			        $promoted=mysqli_query($conn,"SELECT *, ( 3959 * acos( cos( radians($mylocation[0]) ) * cos( radians( lat ) ) * cos( radians( users.long ) - radians($mylocation[1]) ) + sin( radians($mylocation[0]) ) * sin( radians( lat ) ) ) ) AS distance FROM users WHERE gender = '$gender' AND age BETWEEN $age_min AND $age_max and fb_id !='".$fb_id."' and promoted='1' HAVING distance < $distance ORDER BY promoted LIMIT 5");
+			        $query=mysqli_query($conn,"SELECT *, ( 3959 * acos( cos( radians($current_lat) ) * cos( radians( lat ) ) * cos( radians( users.long ) - radians($current_long) ) + sin( radians($current_lat) ) * sin( radians( lat ) ) ) ) AS distance FROM users WHERE gender = '$gender' AND age BETWEEN $age_min AND $age_max and  id !='".$user_id."' HAVING distance < $distance ORDER BY distance");
+//			        $promoted=mysqli_query($conn,"SELECT *, ( 3959 * acos( cos( radians($mylocation[0]) ) * cos( radians( lat ) ) * cos( radians( users.long ) - radians($mylocation[1]) ) + sin( radians($mylocation[0]) ) * sin( radians( lat ) ) ) ) AS distance FROM users WHERE gender = '$gender' AND age BETWEEN $age_min AND $age_max and fb_id !='".$fb_id."' and promoted='1' HAVING distance < $distance ORDER BY promoted LIMIT 5");
 			    }
 			    //echo "SELECT *, ( 3959 * acos( cos( radians($mylocation[0]) ) * cos( radians( lat ) ) * cos( radians( users.long ) - radians($mylocation[1]) ) + sin( radians($mylocation[0]) ) * sin( radians( lat ) ) ) ) AS distance FROM users WHERE gender = '$gender' AND age >= $age_range and fb_id !='".$fb_id."' HAVING distance < $distance ORDER BY distance LIMIT 40"
 			    //echo "SELECT *, ( 3959 * acos( cos( radians($mylocation[0]) ) * cos( radians( lat ) ) * cos( radians( users.long ) - radians($mylocation[1]) ) + sin( radians($mylocation[0]) ) * sin( radians( lat ) ) ) ) AS distance FROM users WHERE gender = '$gender' AND age >= $age_range and fb_id !='".$fb_id."' HAVING distance < $distance ORDER BY distance LIMIT 40";
@@ -1255,80 +1252,80 @@
 		      //  }
 		        //$query=mysqli_query($conn,"select * from users where fb_id !='".$fb_id."' ORDER BY id DESC limit 20 ");
 		       
-		        //check if block or not
-		        $qrry_1="select * from users where fb_id ='".$fb_id."' ";
-    			$log_in_rs=mysqli_query($conn,$qrry_1);
-    			$rd=mysqli_fetch_object($log_in_rs); 
-		        $profile_block=$rd->block;
+//		        //check if block or not
+//		        $qrry_1="select * from users where id ='".$fb_id."' ";
+//    			$log_in_rs=mysqli_query($conn,$qrry_1);
+//    			$rd=mysqli_fetch_object($log_in_rs);
+//		        $profile_block=$rd->block;
     			//check if block or not
     			
     			
-    			$array_out_promoted = array();
-        		while($row_promoted=mysqli_fetch_array($promoted))
-        		{
-        		    $qrry_1="select * from like_unlike where action_profile ='".$fb_id."' and effect_profile ='".$row_promoted['fb_id']."'  ";
-        		   	$log_in_rs=mysqli_query($conn,$qrry_1);
-        			
-        			$rd=mysqli_fetch_object($log_in_rs);
-    			   
-    			    if(@$rd->effect_profile != @$row_promoted['fb_id'] || (@$rd->effected=="false" && @$rd->match_profile=="false"))
-    			    {
-    			        $action_type=@$rd->action_type;
-    			        if($action_type==null)
-    			        {
-    			            $action_type="false";
-    			        }
-    			        
-    			        $mylocation=explode(",",$lat_long);
-            			$other_profiles=explode(",",$row_promoted['lat_long']);
-            			
-            		    
-        			    $INoneKM= distance($mylocation[0],$mylocation[1],$other_profiles[0],$other_profiles[1], "K");
-        				$underONE_KM=explode(".",$INoneKM);
-        				
-        				      $birthDate = $row_promoted['birthday'];
-                              //explode the date to get month, day and year
-                              $birthDate = explode("/", $birthDate);
-                              //get age from date or birthdate
-                              $age = (date("md", date("U", @mktime(0, 0, 0, $birthDate[0], $birthDate[1], $birthDate[2]))) > date("md")
-                                ? ((date("Y") - $birthDate[2]) - 1)
-                                : (date("Y") - $birthDate[2]));
-                              
-            				 $array_out_promoted[] = 
-            					//array("code" => "200");
-            					array(
-            						"fb_id" => $row_promoted['fb_id'],
-            						"first_name" => $row_promoted['first_name'],
-            						"last_name" => $row_promoted['last_name'],
-            						"birthday" => "$a$row_promotedge",
-            						"about_me" => htmlentities($row_promoted['about_me']),
-            						"distance" => $underONE_KM[0]." miles away",
-            						"gender" => $row_promoted['gender'],
-            						"image1" => $row_promoted['image1'],
-            						"image2" => $row_promoted['image2'],
-            						"image3" => $row_promoted['image3'],
-            						"image4" => $row_promoted['image4'],
-            						"image5" => $row_promoted['image5'],
-            						"image6" => $row_promoted['image6'],
-            						"job_title" => $row_promoted['job_title'],
-            						"company" => $row_promoted['company'],
-            						"school" => $row_promoted['school'],
-            						"super_like" => $rd->super_like,
-            						"swipe" => $action_type,
-            						"block" =>  $profile_block,  //0= normal  1=user blocked and auto logout
-									"hide_age" => $row_promoted['hide_age'],
-            						"hide_location" => $row_promoted['hide_location'],
-            						
-            					); 
-        			}
-        		}
+//    			$array_out_promoted = array();
+//        		while($row_promoted=mysqli_fetch_array($promoted))
+//        		{
+//        		    $qrry_1="select * from like_unlike where action_profile ='".$fb_id."' and effect_profile ='".$row_promoted['fb_id']."'  ";
+//        		   	$log_in_rs=mysqli_query($conn,$qrry_1);
+//
+//        			$rd=mysqli_fetch_object($log_in_rs);
+//
+//    			    if(@$rd->effect_profile != @$row_promoted['fb_id'] || (@$rd->effected=="false" && @$rd->match_profile=="false"))
+//    			    {
+//    			        $action_type=@$rd->action_type;
+//    			        if($action_type==null)
+//    			        {
+//    			            $action_type="false";
+//    			        }
+//
+//    			        $mylocation=explode(",",$lat_long);
+//            			$other_profiles=explode(",",$row_promoted['lat_long']);
+//
+//
+//        			    $INoneKM= distance($mylocation[0],$mylocation[1],$other_profiles[0],$other_profiles[1], "K");
+//        				$underONE_KM=explode(".",$INoneKM);
+//
+//        				      $birthDate = $row_promoted['birthday'];
+//                              //explode the date to get month, day and year
+//                              $birthDate = explode("/", $birthDate);
+//                              //get age from date or birthdate
+//                              $age = (date("md", date("U", @mktime(0, 0, 0, $birthDate[0], $birthDate[1], $birthDate[2]))) > date("md")
+//                                ? ((date("Y") - $birthDate[2]) - 1)
+//                                : (date("Y") - $birthDate[2]));
+//
+//            				 $array_out_promoted[] =
+//            					//array("code" => "200");
+//            					array(
+//            						"fb_id" => $row_promoted['fb_id'],
+//            						"first_name" => $row_promoted['first_name'],
+//            						"last_name" => $row_promoted['last_name'],
+//            						"birthday" => "$a$row_promotedge",
+//            						"about_me" => htmlentities($row_promoted['about_me']),
+//            						"distance" => $underONE_KM[0]." miles away",
+//            						"gender" => $row_promoted['gender'],
+//            						"image1" => $row_promoted['image1'],
+//            						"image2" => $row_promoted['image2'],
+//            						"image3" => $row_promoted['image3'],
+//            						"image4" => $row_promoted['image4'],
+//            						"image5" => $row_promoted['image5'],
+//            						"image6" => $row_promoted['image6'],
+//            						"job_title" => $row_promoted['job_title'],
+//            						"company" => $row_promoted['company'],
+//            						"school" => $row_promoted['school'],
+//            						"super_like" => $rd->super_like,
+//            						"swipe" => $action_type,
+//            						"block" =>  $profile_block,  //0= normal  1=user blocked and auto logout
+//									"hide_age" => $row_promoted['hide_age'],
+//            						"hide_location" => $row_promoted['hide_location'],
+//
+//            					);
+//        			}
+//        		}
         		
         		
     			
         		$array_out = array();
         		while($row=mysqli_fetch_array($query))
         		{
-        		    $qrry_1="select * from like_unlike where action_profile ='".$fb_id."' and effect_profile ='".$row['fb_id']."'  ";
+        		    $qrry_1="select * from like_unlike where action_profile ='".$user_id."' and effect_profile ='".$row['effect_profile']."' ";
         		   //echo  $qrry_1="select * from like_unlike where action_profile ='".$fb_id."' ";
         		   //echo"<br>";
         			$log_in_rs=mysqli_query($conn,$qrry_1);
@@ -1340,20 +1337,17 @@
     			    //if($row['fb_id'] != $rd->action_type && $row['fb_id'] != $rd->effect_profile)
     			    if(@$rd->effect_profile != @$row['fb_id'] || (@$rd->effected=="false" && @$rd->match_profile=="false"))
     			    {
-    			        
-    			       
     			        $action_type=@$rd->action_type;
     			        if($action_type==null)
-    			        {
-    			            $action_type="false";
-    			        }
-    			        
-    			        
-    			        $mylocation=explode(",",$lat_long);
-            			$other_profiles=explode(",",$row['lat_long']);
-            			
+						{
+							$action_type="false";
+						}
+
+            			$other_profiles_lat=$row['lat'];
+            			$other_profiles_long=$row['long'];
+
             		    
-        			    $INoneKM= distance($mylocation[0],$mylocation[1],$other_profiles[0],$other_profiles[1], "K");
+        			    $INoneKM= distance($current_lat,$current_long,$other_profiles_lat,$other_profiles_long, "K");
         				$underONE_KM=explode(".",$INoneKM);
         				
         				//if($underONE_KM[0]<=$distance)
@@ -1388,7 +1382,7 @@
             						"company" => $row['company'],
             						"school" => $row['school'],
             						"swipe" => $action_type,
-            						"block" =>  $profile_block,  //0= normal  1=user blocked and auto logout
+//            						"block" =>  $profile_block,  //0= normal  1=user blocked and auto logout
 									"hide_age" => $row['hide_age'],
             						"hide_location" => $row['hide_location'],
             						
@@ -1400,7 +1394,7 @@
         		}
 				
 				
-				$qrry_1="select * from users WHERE fb_id ='".$fb_id."' ";
+				$qrry_1="select * from users WHERE user_id ='".$user_id."' ";
 				$log_in_rs=mysqli_query($conn,$qrry_1);
 				
 				$rd=mysqli_fetch_object($log_in_rs);
@@ -1413,29 +1407,29 @@
 					? ((date("Y") - $birthDate[2]) - 1)
 					: (date("Y") - $birthDate[2]));
 					
-				$query_count_total_like="select * from like_unlike where effect_profile ='".$fb_id."' and match_profile='false' and chat='false' and action_type='like' ";
+				$query_count_total_like="select * from like_unlike where effect_profile ='".$user_id."' and match_profile='false' and chat='false' and action_type='like' ";
 			    $log_in_rs11_count_total_like=mysqli_query($conn,$query_count_total_like);
         	    $count_total_like=mysqli_num_rows($log_in_rs11_count_total_like);
 				
-				$query_count_total_super_like="select * from like_unlike where effect_profile ='".$fb_id."' and match_profile='false' and chat='false' and action_type='superLike' ";
+				$query_count_total_super_like="select * from like_unlike where effect_profile ='".$user_id."' and match_profile='false' and chat='false' and action_type='superLike' ";
 			    $log_in_rs11_count_total_super_like=mysqli_query($conn,$query_count_total_super_like);
         	    $count_total_super_like=mysqli_num_rows($log_in_rs11_count_total_super_like);
         	    
-				if($purchased=="1")
-				{
-				    $super_like_limit=PAID_USER_DAILY_SUPERLIKE_LIMIT;
-                    $super_like_limit=$super_like_limit-$count_total_super_like;
-                    
-                    $like_limit=PAID_USER_LIKE_LIMIT;
-                    $like_limit=$like_limit-$count_total_like;
-				}
-				else
-				{
-				    $super_like_limit=UNPAID_USER_DAILY_SUPERLIKE_LIMIT;
-				    
-                    $like_limit=UNPAID_USER_LIKE_LIMIT;
-                    $like_limit=$like_limit-$count_total_like;
-            	}
+//				if($purchased=="1")
+//				{
+//				    $super_like_limit=PAID_USER_DAILY_SUPERLIKE_LIMIT;
+//                    $super_like_limit=$super_like_limit-$count_total_super_like;
+//
+//                    $like_limit=PAID_USER_LIKE_LIMIT;
+//                    $like_limit=$like_limit-$count_total_like;
+//				}
+//				else
+//				{
+//				    $super_like_limit=UNPAID_USER_DAILY_SUPERLIKE_LIMIT;
+//
+//                    $like_limit=UNPAID_USER_LIKE_LIMIT;
+//                    $like_limit=$like_limit-$count_total_like;
+//            	}
 				
 				$array_out_user_info = array();
 					
@@ -1461,16 +1455,16 @@
 					"super_like_limit"=>$super_like_limit,
 					
 					);
-				
-			
-			
+
+
+
         		$output=array( "code" => "200", "promoted"=>$array_out_promoted , "msg" => $array_out , "user_info"=> $array_out_user_info);
         		print_r(json_encode($output, true));
-        	    
-        	    
-        	    
-        	    
-        	    
+
+
+
+
+
         		
 			}
 			else
@@ -1484,9 +1478,9 @@
         		$output=array( "code" => "201", "msg" => $array_out);
         		print_r(json_encode($output, true));
 			}
-			
-		    
-	    	
+
+
+
 		}
 		else
 		{
