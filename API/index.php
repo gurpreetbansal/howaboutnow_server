@@ -5,88 +5,27 @@
 		{
 			signup();
 		}
-		else
-		if ($_GET["p"]=="login") {
+		else if ($_GET["p"]=="login") {
 			login();
 		}
-		else
-		if ($_GET["p"]=="forgot_password") {
+		else if ($_GET["p"]=="forgot_password") {
 			forgotPassword();
 		}
-		else
-		if($_GET["p"]=="edit_profile")
+		else if($_GET["p"]=="edit_profile")
 		{
 			edit_profile();
 		}
-		else
-		if($_GET["p"]=="getUserInfo")
+		else if($_GET["p"]=="getUserInfo")
 		{
 			getUserProfile();
 		}
-		else
-		if($_GET["p"]=="editImage") {
+		else if($_GET["p"]=="editImage") {
 			edit_images();
 		}
-		else
-		if($_GET["p"]=="uploadImages")
-		{
-			uploadImages();
-		}
-		else
-		if($_GET["p"]=="userNearByMe")
+		else if($_GET["p"]=="userNearByMe")
 		{
 			userNearByMe();
 			
-		}
-		else
-		if($_GET["p"]=="deleteImages")
-		{
-			deleteImages();
-		}
-		else
-		if($_GET["p"]=="show_or_hide_profile")
-		{
-			show_or_hide_profile();
-		}
-		else
-		if($_GET["p"]=="update_purchase_Status")
-		{
-			update_purchase_Status();
-		}
-		else
-		if($_GET["p"]=="myMatch")
-		{
-			myMatch();
-		}
-		else
-		if($_GET["p"]=="firstchat")
-		{
-			firstchat();
-		}
-		else
-		if($_GET["p"]=="flat_user")
-		{
-			flat_user();
-		}
-		else
-		if($_GET["p"]=="unMatch")
-		{
-			unMatch();
-		}
-		else
-		if($_GET["p"]=="deleteAccount")
-		{
-			deleteAccount();
-		}
-		else
-		if($_GET["p"]=="boostProfile")
-		{
-			boostProfile();
-		}
-		else
-		if($_GET["p"]=="subscription_update")
-		{
-			subscription_update();
 		}
 		else if($_GET["p"]=="aboutUs")
 		{
@@ -103,6 +42,38 @@
 		else if($_GET["p"]=="enableNoti")
 		{
 			enable_notification();
+		}
+		else if($_GET["p"]=="like_unlike")
+		{
+			like_unlike();
+		}
+		else if($_GET["p"]=="favourite")
+		{
+			favourite();
+		}
+		else if($_GET["p"]=="getNotiStatus")
+		{
+			getNotiStatus();
+		}
+		else if($_GET["p"]=="getProfileInterest")
+		{
+			getProfileInterest();
+		}
+		else if($_GET["p"]=="updateProfileInterest")
+		{
+			updateProfileInterest();
+		}
+		else if($_GET["p"]=="socialLogin")
+		{
+			socialLogin();
+		}
+		else if($_GET["p"]=="nearbyStoryList")
+		{
+			nearby_story_list();
+		}
+		else if($_GET["p"]=="nearbyStoryAdd")
+		{
+			nearby_story_add();
 		}
 		//admin panel functions
 		else
@@ -272,17 +243,10 @@
 			$email=htmlspecialchars_decode(stripslashes($event_json['email']));
 			$password=htmlspecialchars_decode(stripslashes($event_json['password']));
 
-
-//			    $age="".calculateAge($birthday)."";
 			    $qrry_1="insert into users(`first_name`,`last_name`,`profile_type`,`lat`,`long`,`device`,`device_token`,`email`,`password`)values(";
-//    			$qrry_1.="'".$fb_id."',";
     			$qrry_1.="'".$first_name."',";
     			$qrry_1.="'".$last_name."',";
-//    			$qrry_1.="'".$birthday."',";
-//    			$qrry_1.="'".$age."',";
-//    			$qrry_1.="'".$image1."',";
     			$qrry_1.="'".$profile_type."',";
-//    			$qrry_1.="'".$gender."'";
     			$qrry_1.="'".$lat."',";
     			$qrry_1.="'".$lng."',";
     			$qrry_1.="'".$device."',";
@@ -291,12 +255,13 @@
     			$qrry_1.="'".sha1($password)."'";
     			$qrry_1.=")";
 
+//    			var_dump(sha1($password)); die();
+
     			if($m = mysqli_query($conn,$qrry_1))
     			{
     				 $array_out = array();
     				 $array_out[] =
     					array(
-    						"action" => "signup",
     						"first_name" => $first_name,
     						"last_name" => $last_name,
 							"device_token" => $device_token,
@@ -305,6 +270,7 @@
 							"lng" => $lng,
 							 "email" => $email,
 							 "password" => $password,
+						     "token" => 'abcTest',
 						     "user_id" => mysqli_insert_id($conn)
     					);
     				$output=array( "code" => "200", "msg" => $array_out);
@@ -346,19 +312,16 @@
 			$log_in = "select * from users where email='" . $email . "' AND  password='" . sha1($password) . "'";
 			$log_in_rs = mysqli_query($conn, $log_in);
 
-
 			if (mysqli_num_rows($log_in_rs)) {
 				$rd = mysqli_fetch_object($log_in_rs);
 				// update user data
 
-				$updateData = "UPDATE users SET `lat`='".$lat."', `long`='".$lng."', `device_token`='".$device_token."', `device`='".$device."' where id=". $rd->id;
+				$updateData = " UPDATE users SET `lat`='".$lat."', `long`='".$lng."', `device_token`='".$device_token."', `device`='".$device."' where id=". $rd->id;
 				$update = mysqli_query($conn, $updateData);
 
 				$array_out = array();
 				$array_out[] =
-					//array("code" => "200");
 					array(
-						"action" => "login",
 						"user_id" => $rd->id,
 						"first_name" => $rd->first_name,
 						"last_name" => $rd->last_name,
@@ -367,7 +330,7 @@
 						"lat" => $lat,
 						"lng" => $lng,
 						"email" => $email,
-						"password" => $password,
+						"token" => 'abcTest'
 					);
 
 				$output = array("code" => "200", "msg" => $array_out);
@@ -518,37 +481,34 @@
 				$query = "SELECT ua.answer, ql.question, ql.id FROM `user_answer` as ua right join question_list as ql ON ql.id = ua.ques_id AND ua.user_id =".$user_id;
 				$query_list = mysqli_query($conn, $query);
 
-				$answerData = mysqli_fetch_all($query_list,MYSQLI_ASSOC);
+//				$answerData = mysqli_fetch_all($query_list,MYSQLI_ASSOC);
+				$answerData = array();
 
-                $birthDate = $rd->birthday;
-                //explode the date to get month, day and year
-                $birthDate = explode("/", $birthDate);
-                //get age from date or birthdate
-                $age = (date("md", date("U", @mktime(0, 0, 0, $birthDate[0], $birthDate[1], $birthDate[2]))) > date("md")
-                    ? ((date("Y") - $birthDate[2]) - 1)
-                    : (date("Y") - $birthDate[2]));
+				while($m = mysqli_fetch_array($query_list)) {
+					$answerData[] = array (
+						"ques_id" => $m['id'],
+						"question" => $m['question'],
+						"answer" => is_null($m['answer'])?'':$m['answer']
+					);
 
-
+				}
                 $array_out = array();
 
                 $array_out[] =
                     array(
                         "about_me" => $rd->about_me,
-                        "job_title" => $rd->job_title,
                         "gender" => $rd->gender,
                         "birthday" => $rd->birthday,
-                        "age" => $age,
-                        "company" => $rd->company,
-                        "school" => $rd->school,
+                        "age" => $rd->age,
                         "first_name" => $rd->first_name,
                         "last_name" => $rd->last_name,
                         "user_answer" => $answerData,
-                        "image1" => htmlspecialchars_decode(stripslashes($rd->image1)),
-                        "image2" => htmlspecialchars_decode(stripslashes($rd->image2)),
-                        "image3" => htmlspecialchars_decode(stripslashes($rd->image3)),
-                        "image4" => htmlspecialchars_decode(stripslashes($rd->image4)),
-                        "image5" => htmlspecialchars_decode(stripslashes($rd->image5)),
-                        "image6" => htmlspecialchars_decode(stripslashes($rd->image6)),
+						"image1" => isset($rd->image1)&& !empty($rd->image1)?'https://clientstagingdev.com/how_about_now/uploads/'.$rd->id.'/'.$rd->image1:'',
+						"image2" => isset($rd->image2)&& !empty($rd->image2)?'https://clientstagingdev.com/how_about_now/uploads/'.$rd->id.'/'.$rd->image2:'',
+						"image3" => isset($rd->image3)&& !empty($rd->image3)?'https://clientstagingdev.com/how_about_now/uploads/'.$rd->id.'/'.$rd->image3:'',
+						"image4" => isset($rd->image4)&& !empty($rd->image4)?'https://clientstagingdev.com/how_about_now/uploads/'.$rd->id.'/'.$rd->image4:'',
+						"image5" => isset($rd->image5)&& !empty($rd->image5)?'https://clientstagingdev.com/how_about_now/uploads/'.$rd->id.'/'.$rd->image5:'',
+						"image6" => isset($rd->image6)&& !empty($rd->image6)?'https://clientstagingdev.com/how_about_now/uploads/'.$rd->id.'/'.$rd->image6:'',
                     );
 
                 $output = array("code" => "200", "msg" => $array_out);
@@ -573,85 +533,45 @@
 	//print_r($event_json);
 	//0= owner  1= company 2= ind mechanic
 
-	if(isset($event_json['user_id']) && isset($event_json['first_name']) && isset($event_json['last_name']))
+	if(isset($event_json['user_id']))
 	{
 		$user_id=htmlspecialchars(strip_tags($event_json['user_id'] , ENT_QUOTES));
 		$about_me=htmlspecialchars(strip_tags($event_json['about_me'] , ENT_QUOTES));
-		$job_title=htmlspecialchars(strip_tags($event_json['job_title'] , ENT_QUOTES));
-		$company=htmlspecialchars(strip_tags($event_json['company'] , ENT_QUOTES));
-		$school=htmlspecialchars(strip_tags($event_json['school'] , ENT_QUOTES));
-
 		$gender=htmlspecialchars(strip_tags(strtolower($event_json['gender']) , ENT_QUOTES));
 		$birthday=htmlspecialchars(strip_tags($event_json['birthday'] , ENT_QUOTES));
-		$first_name=htmlspecialchars(strip_tags($event_json['first_name'] , ENT_QUOTES));
-		$last_name=htmlspecialchars(strip_tags($event_json['last_name'] , ENT_QUOTES));
 		$question_data=$event_json['question_data'];
 
 		$age=calculateAge($birthday);
 
 		if(count($question_data)) {
 			foreach($question_data as $qd) {
-				$checkTable = "Select * from user_answer where user_id = ".$user_id." AND quest_id =".$qd['ques_id'];
-				$log_in_rs = mysqli_query($conn,$checkTable);
-				if(mysqli_num_rows($log_in_rs)) {
+//				print_r($qd); die();
+				$checkTable = "Select * from user_answer where user_id = ".$user_id." AND ques_id =".$qd['ques_id'];
+				$ct = mysqli_query($conn,$checkTable);
+				if(mysqli_num_rows($ct)) {
 					// update data
-					$qrry_up = "UPDATE user_answer SET answer='".$qd['answer']."' WHERE user_id = ".$user_id." AND quest_id =".$qd['ques_id'];
+					$qrry_up = "UPDATE user_answer SET answer='".$qd['answer']."' WHERE user_id = ".$user_id." AND ques_id =".$qd['ques_id'];
 					mysqli_query($conn,$qrry_up);
 				} else {
 					// insert Data
 					$qrry_ins="insert into user_answer(`ques_id`,`user_id`,`answer`)values(";
 					$qrry_ins.="'".$qd['ques_id']."',";
 					$qrry_ins.="'".$user_id."',";
-					$qrry_ins.="'".$qd['answer']."',";
+					$qrry_ins.="'".$qd['answer']."'";
 					$qrry_ins.=")";
-					var_dump($qrry_ins);
 					mysqli_query($conn,$qrry_ins);
 				}
 			}
 		}
 
-		$qrry_1="update users SET about_me ='".$about_me."' , job_title ='".$job_title."', birthday ='".$birthday."' , age ='".$age."' , company ='".$company."' , school ='".$school."' , gender ='".$gender."'  WHERE id ='".$user_id."' ";
+		$qrry_1="update users SET about_me ='".$about_me."' , birthday ='".$birthday."' , age ='".$age."' , gender ='".$gender."'  WHERE id ='".$user_id."' ";
 
 		if(mysqli_query($conn,$qrry_1))
 		{
 			$array_out = array();
-
-			$qrry_1="select * from users WHERE id ='".$user_id."' ";
-			$log_in_rs=mysqli_query($conn,$qrry_1);
-
-			if(mysqli_num_rows($log_in_rs))
-			{
-
-
-				$rd=mysqli_fetch_object($log_in_rs);
-
-				$birthDate = $rd->birthday;
-				//explode the date to get month, day and year
-				$birthDate = explode("/", $birthDate);
-				//get age from date or birthdate
-				$age = (date("md", date("U", @mktime(0, 0, 0, $birthDate[0], $birthDate[1], $birthDate[2]))) > date("md")
-					? ((date("Y") - $birthDate[2]) - 1)
-					: (date("Y") - $birthDate[2]));
-
-
-				$array_out = array();
-
-				$array_out[] =
-					array(
-						"about_me" => $rd->about_me,
-						"job_title" => $rd->job_title,
-						"gender" => $rd->gender,
-						"birthday" => $rd->birthday,
-						"age" => $age,
-						"company" => $rd->company,
-						"school" => $rd->school,
-						"first_name" => $rd->first_name,
-						"last_name" => $rd->last_name,
-					);
-
-				$output=array( "code" => "200", "msg" => $array_out);
-				print_r(json_encode($output, true));
-			}
+			$array_out[] = array("response" => "Profile updated successfully");
+			$output=array( "code" => "200", "msg" => $array_out);
+			print_r(json_encode($output, true));
 		}
 		else
 		{
@@ -688,11 +608,9 @@
 		foreach($_FILES as $k => $f) {
 			if ($f['size'] > 0) {
 				$target_path = "../uploads/" . $_POST['user_id'] . "/";
-//				var_dump($target_path); die();
 				if (!is_dir($target_path)) {
 					mkdir($target_path, 0777);
 				}
-
 				$target_path = $target_path . basename($f['name']);
 				if (move_uploaded_file($f['tmp_name'], $target_path)) {
 					$qrry_1 = "UPDATE users SET `$k`='" . $f['name'] . "' Where id = " . $_POST['user_id'];
@@ -714,337 +632,335 @@
 		$output=array( "code" => "200", "msg" => $array_out);
 		print_r(json_encode($output, true));
 	}
-
-	function flat_user()
-	{
-	    require_once("config.php");
-	    $input = @file_get_contents("php://input");
-	    $event_json = json_decode($input,true);
-		//print_r($event_json);
-		//0= owner  1= company 2= ind mechanic
-		
-		if(isset($event_json['fb_id']) && isset($event_json['my_id']))
-		{
-			$fb_id=htmlspecialchars(strip_tags($event_json['fb_id'] , ENT_QUOTES));
-			$my_id=htmlspecialchars(strip_tags($event_json['my_id'] , ENT_QUOTES));
-			
-			$qrry_1="insert into flag_user(user_id,flag_by)values(";
-			$qrry_1.="'".$fb_id."',";
-			$qrry_1.="'".$my_id."'";
-			$qrry_1.=")";
-			if(mysqli_query($conn,$qrry_1))
-			{
-			 
-			
-				 $array_out = array();
-				 $array_out[] = 
-					//array("code" => "200");
-					array(
-        			"response" =>"successful");
-				
-				$output=array( "code" => "200", "msg" => $array_out);
-				print_r(json_encode($output, true));
-			}
-			else
-			{
-			    //echo mysqli_error();
-			    $array_out = array();
-					
-        		 $array_out[] = 
-        			array(
-        			"response" =>"problem in signup");
-        		
-        		$output=array( "code" => "201", "msg" => $array_out);
-        		print_r(json_encode($output, true));
-			}
-			
-			
-			
-		}
-		else
-		{
-			$array_out = array();
-					
-			 $array_out[] = 
-				array(
-				"response" =>"Json Parem are missing");
-			
-			$output=array( "code" => "201", "msg" => $array_out);
-			print_r(json_encode($output, true));
-		}
-	    
-	}
-
-	function uploadImages()
-	{
-		require_once("config.php");
-	    $input = @file_get_contents("php://input");
-	    $event_json = json_decode($input,true);
-		//print_r($event_json);
-		//0= owner  1= company 2= ind mechanic
-		
-		if(isset($event_json['fb_id']) && isset($event_json['image_link']) )
-		{
-			$fb_id=htmlspecialchars(strip_tags($event_json['fb_id'] , ENT_QUOTES));
-			$image_link=stripslashes(strip_tags($event_json['image_link']));
-
-			$qrry_1="select * from users WHERE fb_id ='".$fb_id."' ";
-			$log_in_rs=mysqli_query($conn,$qrry_1);
-			
-			if(mysqli_num_rows($log_in_rs))
-			{
-			    $rd=mysqli_fetch_object($log_in_rs);
-			    
-			    if($rd->image2=="")
-			    {
-			        $colum_name="image2";
-			    }
-			    else
-			    if($rd->image3=="")
-			    {
-			        $colum_name="image3";
-			    }
-			    else
-			    if($rd->image4=="")
-			    {
-			        $colum_name="image4";
-			    }
-			    else
-			    if($rd->image5=="")
-			    {
-			        $colum_name="image5";
-			    }
-			    else
-			    if($rd->image6=="")
-			    {
-			        $colum_name="image6";
-			    }
-			    
-			    
-			    $qrry_1="insert into user_images(fb_id,image_url,columName)values(";
-        		$qrry_1.="'".$fb_id."',";
-        		$qrry_1.="'".$image_link."',";
-        		$qrry_1.="'".$colum_name."'";
-        		$qrry_1.=")";
-        		mysqli_query($conn,$qrry_1);
-        		
-			    $qrry_1="update users SET $colum_name ='".$image_link."' WHERE fb_id ='".$fb_id."' ";
-    			if(mysqli_query($conn,$qrry_1))
-    			{
-    			    $array_out = array();
-    					
-            		 $array_out[] = 
-            			array(
-            			"response" =>"success");
-            		
-            		$output=array( "code" => "200", "msg" => $array_out);
-            		print_r(json_encode($output, true));
-    			}
-    			else
-    			{
-    			    $array_out = array();
-    					
-            		 $array_out[] = 
-            			array(
-            			"response" =>"problem in uploading");
-            		
-            		$output=array( "code" => "201", "msg" => $array_out);
-            		print_r(json_encode($output, true));
-    			}
-			}
-		}
-		else
-		{
-			$array_out = array();
-					
-			 $array_out[] = 
-				array(
-				"response" =>"Json Parem are missing");
-			
-			$output=array( "code" => "201", "msg" => $array_out);
-			print_r(json_encode($output, true));
-		}
-	}
-	
-	function Update_From_Firebase()
-	{
-	    require_once("config.php");
-	    $input = @file_get_contents("php://input");
-	    $event_json = json_decode($input,true);
-	    
-	    $headers = array(
-		"Accept: application/json",
-		"Content-Type: application/json"
-    	);
-    	
-    	$data = array();
-    	
-    	$ch = curl_init($firebaseDb_URL.'/.json');
-    	
-    	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
-    	curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-    	curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    	
-    	$return = curl_exec($ch);
-    	
-    	$json_data = json_decode($return, true);
-    	
-    	foreach ($json_data as $key => $item) 
-    	{
-            // 		echo" this user >>   ";
-            // 		print_r($key);
-            		
-            // 		//print_r($item);
-            // 		echo"<br>";
-    		
-    		
-    		foreach ($item as $key1 => $item1)
-    		{
-    		    
-    		  //  $data = array("fetch"=>"true");
-    	
-        //     	$ch = curl_init($firebaseDb_URL.'/'. $key .'/'.$key1.'/.json');
-            	
-        //     	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        //     	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PATCH');
-        //     	curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-        //     	curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-            	
-        //     	$return = curl_exec($ch);
-            	
-        //     	$json_data = json_decode($return, true);
-            	
-    		    if(!isset($item1['fetch']))
-    		    {
-    		       
-    		       //print_r($item1['match']);
-        		     if($item1['match']=="false")
-        		     {
-        		         $match= "false";
-        		     }
-        		     
-        		     if($item1['match']=="true")
-        		     {
-        		         $match= "true";
-        		     }
-        		     $effeted=$item1['effect'];
-        		    
-                        		  //  echo "<br>";
-                        		  //  print_r($key);
-                            //         print_r($item1['type']);
-                            //         			echo"  this user >>>>>>    ";
-                            //         			print_r($key1);
-                            //         			print_r($item1['name']);
-                            //         			echo"<br>";
-                        			
-        			
-        			$qrry_1="insert into like_unlike(action_profile,effect_profile,action_type,match_profile,effected)values(";
-            		$qrry_1.="'".$key."',";
-            		$qrry_1.="'".$key1."',";
-            		$qrry_1.="'".$item1['type']."',";
-            		$qrry_1.="'".$match."',";
-            		$qrry_1.="'".$effeted."'";
-            		$qrry_1.=")";
-            		if(mysqli_query($conn,$qrry_1))
-            		{
-            		    //echo "insert done";
-            		   // echo $item1['effect']=="true";
-            		    if($item1['type']=="like" && $item1['effect']=="true")
-            		    {
-            		        $qrry_1="update users SET like_count = like_count+1 WHERE fb_id ='".$key."' ";
-                			if(mysqli_query($conn,$qrry_1))
-                			{
-                			    //echo "udpate";
-                			}
-                			
-                			if($item1['status']=="1")
-                			{
-                    			$ch1 = curl_init($firebaseDb_URL.'/'. $key .'/'.$key1.'/.json');
-                				curl_setopt($ch1, CURLOPT_RETURNTRANSFER, true);
-                            	curl_setopt($ch1, CURLOPT_CUSTOMREQUEST, 'DELETE');
-                            	curl_setopt($ch1, CURLOPT_POSTFIELDS, json_encode($data));
-                            	curl_setopt($ch1, CURLOPT_HTTPHEADER, $headers);
-                            	
-                            	$return = curl_exec($ch1);
-                            	
-                            	$json_data = json_decode($return, true);
-                            	
-                            	
-                            	$curl_error = curl_error($ch1);
-                            	$http_code = curl_getinfo($ch1, CURLINFO_HTTP_CODE);
-                			}	
-                			
-            		    }
-            		    else
-            		    if($item1['type']=="dislike" && $item1['effect']=="true")
-            		    {
-            		        $qrry_1="update users SET dislike_count = dislike_count+1 WHERE fb_id ='".$key."' ";
-                			if(mysqli_query($conn,$qrry_1))
-                			{
-                			    //echo "udpate";
-                			}
-                			
-                			$ch1 = curl_init($firebaseDb_URL.'/'. $key .'/'.$key1.'/.json');
-            				curl_setopt($ch1, CURLOPT_RETURNTRANSFER, true);
-                        	curl_setopt($ch1, CURLOPT_CUSTOMREQUEST, 'DELETE');
-                        	curl_setopt($ch1, CURLOPT_POSTFIELDS, json_encode($data));
-                        	curl_setopt($ch1, CURLOPT_HTTPHEADER, $headers);
-                        	
-                        	$return = curl_exec($ch1);
-                        	
-                        	$json_data = json_decode($return, true);
-                        	
-                        	
-                        	$curl_error = curl_error($ch1);
-                        	$http_code = curl_getinfo($ch1, CURLINFO_HTTP_CODE);
-                        	
-                        	if($item1['status']=="1")
-                			{
-                    			$ch1 = curl_init($firebaseDb_URL.'/'. $key .'/'.$key1.'/.json');
-                				curl_setopt($ch1, CURLOPT_RETURNTRANSFER, true);
-                            	curl_setopt($ch1, CURLOPT_CUSTOMREQUEST, 'DELETE');
-                            	curl_setopt($ch1, CURLOPT_POSTFIELDS, json_encode($data));
-                            	curl_setopt($ch1, CURLOPT_HTTPHEADER, $headers);
-                            	
-                            	$return = curl_exec($ch1);
-                            	
-                            	$json_data = json_decode($return, true);
-                            	
-                            	
-                            	$curl_error = curl_error($ch1);
-                            	$http_code = curl_getinfo($ch1, CURLINFO_HTTP_CODE);
-                			}	
-            		    }
-            		    
-            		   
-            		} 
-    		        
-    		    }
-    		     
-        		
-    		}
-    	}
-    	
-    	
-    	
-    	//Delete firebase db data after insert
-    	
-    	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
-    	curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-    	curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    	
-    	$return = curl_exec($ch);
-    	
-    	$json_data = json_decode($return, true);
-    	
-    	
-    	$curl_error = curl_error($ch);
-    	$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-	    
-	}
-
+//	function flat_user()
+//	{
+//	    require_once("config.php");
+//	    $input = @file_get_contents("php://input");
+//	    $event_json = json_decode($input,true);
+//		//print_r($event_json);
+//		//0= owner  1= company 2= ind mechanic
+//
+//		if(isset($event_json['fb_id']) && isset($event_json['my_id']))
+//		{
+//			$fb_id=htmlspecialchars(strip_tags($event_json['fb_id'] , ENT_QUOTES));
+//			$my_id=htmlspecialchars(strip_tags($event_json['my_id'] , ENT_QUOTES));
+//
+//			$qrry_1="insert into flag_user(user_id,flag_by)values(";
+//			$qrry_1.="'".$fb_id."',";
+//			$qrry_1.="'".$my_id."'";
+//			$qrry_1.=")";
+//			if(mysqli_query($conn,$qrry_1))
+//			{
+//
+//
+//				 $array_out = array();
+//				 $array_out[] =
+//					//array("code" => "200");
+//					array(
+//        			"response" =>"successful");
+//
+//				$output=array( "code" => "200", "msg" => $array_out);
+//				print_r(json_encode($output, true));
+//			}
+//			else
+//			{
+//			    //echo mysqli_error();
+//			    $array_out = array();
+//
+//        		 $array_out[] =
+//        			array(
+//        			"response" =>"problem in signup");
+//
+//        		$output=array( "code" => "201", "msg" => $array_out);
+//        		print_r(json_encode($output, true));
+//			}
+//
+//
+//
+//		}
+//		else
+//		{
+//			$array_out = array();
+//
+//			 $array_out[] =
+//				array(
+//				"response" =>"Json Parem are missing");
+//
+//			$output=array( "code" => "201", "msg" => $array_out);
+//			print_r(json_encode($output, true));
+//		}
+//
+//	}
+//
+//	function uploadImages()
+//	{
+//		require_once("config.php");
+//	    $input = @file_get_contents("php://input");
+//	    $event_json = json_decode($input,true);
+//		//print_r($event_json);
+//		//0= owner  1= company 2= ind mechanic
+//
+//		if(isset($event_json['fb_id']) && isset($event_json['image_link']) )
+//		{
+//			$fb_id=htmlspecialchars(strip_tags($event_json['fb_id'] , ENT_QUOTES));
+//			$image_link=stripslashes(strip_tags($event_json['image_link']));
+//
+//			$qrry_1="select * from users WHERE fb_id ='".$fb_id."' ";
+//			$log_in_rs=mysqli_query($conn,$qrry_1);
+//
+//			if(mysqli_num_rows($log_in_rs))
+//			{
+//			    $rd=mysqli_fetch_object($log_in_rs);
+//
+//			    if($rd->image2=="")
+//			    {
+//			        $colum_name="image2";
+//			    }
+//			    else
+//			    if($rd->image3=="")
+//			    {
+//			        $colum_name="image3";
+//			    }
+//			    else
+//			    if($rd->image4=="")
+//			    {
+//			        $colum_name="image4";
+//			    }
+//			    else
+//			    if($rd->image5=="")
+//			    {
+//			        $colum_name="image5";
+//			    }
+//			    else
+//			    if($rd->image6=="")
+//			    {
+//			        $colum_name="image6";
+//			    }
+//
+//
+//			    $qrry_1="insert into user_images(fb_id,image_url,columName)values(";
+//        		$qrry_1.="'".$fb_id."',";
+//        		$qrry_1.="'".$image_link."',";
+//        		$qrry_1.="'".$colum_name."'";
+//        		$qrry_1.=")";
+//        		mysqli_query($conn,$qrry_1);
+//
+//			    $qrry_1="update users SET $colum_name ='".$image_link."' WHERE fb_id ='".$fb_id."' ";
+//    			if(mysqli_query($conn,$qrry_1))
+//    			{
+//    			    $array_out = array();
+//
+//            		 $array_out[] =
+//            			array(
+//            			"response" =>"success");
+//
+//            		$output=array( "code" => "200", "msg" => $array_out);
+//            		print_r(json_encode($output, true));
+//    			}
+//    			else
+//    			{
+//    			    $array_out = array();
+//
+//            		 $array_out[] =
+//            			array(
+//            			"response" =>"problem in uploading");
+//
+//            		$output=array( "code" => "201", "msg" => $array_out);
+//            		print_r(json_encode($output, true));
+//    			}
+//			}
+//		}
+//		else
+//		{
+//			$array_out = array();
+//
+//			 $array_out[] =
+//				array(
+//				"response" =>"Json Parem are missing");
+//
+//			$output=array( "code" => "201", "msg" => $array_out);
+//			print_r(json_encode($output, true));
+//		}
+//	}
+//
+//	function Update_From_Firebase()
+//	{
+//	    require_once("config.php");
+//	    $input = @file_get_contents("php://input");
+//	    $event_json = json_decode($input,true);
+//
+//	    $headers = array(
+//		"Accept: application/json",
+//		"Content-Type: application/json"
+//    	);
+//
+//    	$data = array();
+//
+//    	$ch = curl_init($firebaseDb_URL.'/.json');
+//
+//    	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+//    	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
+//    	curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+//    	curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+//
+//    	$return = curl_exec($ch);
+//
+//    	$json_data = json_decode($return, true);
+//
+//    	foreach ($json_data as $key => $item)
+//    	{
+//            // 		echo" this user >>   ";
+//            // 		print_r($key);
+//
+//            // 		//print_r($item);
+//            // 		echo"<br>";
+//
+//
+//    		foreach ($item as $key1 => $item1)
+//    		{
+//
+//    		  //  $data = array("fetch"=>"true");
+//
+//        //     	$ch = curl_init($firebaseDb_URL.'/'. $key .'/'.$key1.'/.json');
+//
+//        //     	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+//        //     	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PATCH');
+//        //     	curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+//        //     	curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+//
+//        //     	$return = curl_exec($ch);
+//
+//        //     	$json_data = json_decode($return, true);
+//
+//    		    if(!isset($item1['fetch']))
+//    		    {
+//
+//    		       //print_r($item1['match']);
+//        		     if($item1['match']=="false")
+//        		     {
+//        		         $match= "false";
+//        		     }
+//
+//        		     if($item1['match']=="true")
+//        		     {
+//        		         $match= "true";
+//        		     }
+//        		     $effeted=$item1['effect'];
+//
+//                        		  //  echo "<br>";
+//                        		  //  print_r($key);
+//                            //         print_r($item1['type']);
+//                            //         			echo"  this user >>>>>>    ";
+//                            //         			print_r($key1);
+//                            //         			print_r($item1['name']);
+//                            //         			echo"<br>";
+//
+//
+//        			$qrry_1="insert into like_unlike(action_profile,effect_profile,action_type,match_profile,effected)values(";
+//            		$qrry_1.="'".$key."',";
+//            		$qrry_1.="'".$key1."',";
+//            		$qrry_1.="'".$item1['type']."',";
+//            		$qrry_1.="'".$match."',";
+//            		$qrry_1.="'".$effeted."'";
+//            		$qrry_1.=")";
+//            		if(mysqli_query($conn,$qrry_1))
+//            		{
+//            		    //echo "insert done";
+//            		   // echo $item1['effect']=="true";
+//            		    if($item1['type']=="like" && $item1['effect']=="true")
+//            		    {
+//            		        $qrry_1="update users SET like_count = like_count+1 WHERE fb_id ='".$key."' ";
+//                			if(mysqli_query($conn,$qrry_1))
+//                			{
+//                			    //echo "udpate";
+//                			}
+//
+//                			if($item1['status']=="1")
+//                			{
+//                    			$ch1 = curl_init($firebaseDb_URL.'/'. $key .'/'.$key1.'/.json');
+//                				curl_setopt($ch1, CURLOPT_RETURNTRANSFER, true);
+//                            	curl_setopt($ch1, CURLOPT_CUSTOMREQUEST, 'DELETE');
+//                            	curl_setopt($ch1, CURLOPT_POSTFIELDS, json_encode($data));
+//                            	curl_setopt($ch1, CURLOPT_HTTPHEADER, $headers);
+//
+//                            	$return = curl_exec($ch1);
+//
+//                            	$json_data = json_decode($return, true);
+//
+//
+//                            	$curl_error = curl_error($ch1);
+//                            	$http_code = curl_getinfo($ch1, CURLINFO_HTTP_CODE);
+//                			}
+//
+//            		    }
+//            		    else
+//            		    if($item1['type']=="dislike" && $item1['effect']=="true")
+//            		    {
+//            		        $qrry_1="update users SET dislike_count = dislike_count+1 WHERE fb_id ='".$key."' ";
+//                			if(mysqli_query($conn,$qrry_1))
+//                			{
+//                			    //echo "udpate";
+//                			}
+//
+//                			$ch1 = curl_init($firebaseDb_URL.'/'. $key .'/'.$key1.'/.json');
+//            				curl_setopt($ch1, CURLOPT_RETURNTRANSFER, true);
+//                        	curl_setopt($ch1, CURLOPT_CUSTOMREQUEST, 'DELETE');
+//                        	curl_setopt($ch1, CURLOPT_POSTFIELDS, json_encode($data));
+//                        	curl_setopt($ch1, CURLOPT_HTTPHEADER, $headers);
+//
+//                        	$return = curl_exec($ch1);
+//
+//                        	$json_data = json_decode($return, true);
+//
+//
+//                        	$curl_error = curl_error($ch1);
+//                        	$http_code = curl_getinfo($ch1, CURLINFO_HTTP_CODE);
+//
+//                        	if($item1['status']=="1")
+//                			{
+//                    			$ch1 = curl_init($firebaseDb_URL.'/'. $key .'/'.$key1.'/.json');
+//                				curl_setopt($ch1, CURLOPT_RETURNTRANSFER, true);
+//                            	curl_setopt($ch1, CURLOPT_CUSTOMREQUEST, 'DELETE');
+//                            	curl_setopt($ch1, CURLOPT_POSTFIELDS, json_encode($data));
+//                            	curl_setopt($ch1, CURLOPT_HTTPHEADER, $headers);
+//
+//                            	$return = curl_exec($ch1);
+//
+//                            	$json_data = json_decode($return, true);
+//
+//
+//                            	$curl_error = curl_error($ch1);
+//                            	$http_code = curl_getinfo($ch1, CURLINFO_HTTP_CODE);
+//                			}
+//            		    }
+//
+//
+//            		}
+//
+//    		    }
+//
+//
+//    		}
+//    	}
+//
+//
+//
+//    	//Delete firebase db data after insert
+//
+//    	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+//    	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
+//    	curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+//    	curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+//
+//    	$return = curl_exec($ch);
+//
+//    	$json_data = json_decode($return, true);
+//
+//
+//    	$curl_error = curl_error($ch);
+//    	$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+//
+//	}
 	function userNearByMe()
 	{
 		require_once("config.php");
@@ -1144,14 +1060,11 @@
 
 					$array_out[] =
 						array(
+							"effective_user_id" => $row['id'],
 							"about_me" => $row['about_me'],
-							"job_title" => $row['job_title'],
 							"gender" => $row['gender'],
 							"birthday" => $row['birthday'],
 							"age" => $row['age'],
-//							"company" => $row['company'],
-//							"school" => $rd->school,
-//							"promoted" => $rd->promoted,
 							"first_name" =>$row['first_name'],
 							"last_name" => $row['last_name'],
 							"image1" => isset($row['image1'])&& !empty($row['image1'])?'https://clientstagingdev.com/how_about_now/uploads/'.$row['id'].'/'.$row['image1']:'',
@@ -1165,7 +1078,6 @@
 							"latitude" => $row['lat'],
 							"longitude" => $row['long']
 						);
-
 				}
         		$output=array( "code" => "200", "msg" => $array_out);
         		print_r(json_encode($output, true));
@@ -1284,221 +1196,589 @@
 }
 
 	function enable_notification() {
-	require_once("config.php");
-	$input = @file_get_contents("php://input");
-	$event_json = json_decode($input,true);
-	if(isset($event_json['user_id']) && !empty($event_json['user_id'])) {
-		$user_id = $event_json['user_id'];
-		$offer_promotions_noti = $event_json['offer_promotions_noti'];
-		$friend_bday_noti = $event_json['friend_bday_noti'];
-		$purchase_noti = $event_json['purchase_noti'];
-		$like_noti = $event_json['like_noti'];
-		$profile_visit_noti = $event_json['profile_visit_noti'];
-		$new_message_noti = $event_json['new_message_noti'];
-		$match_noti = $event_json['match_noti'];
-		$recommend_noti = $event_json['recommend_noti'];
+		require_once("config.php");
+		$input = @file_get_contents("php://input");
+		$event_json = json_decode($input,true);
+		if(isset($event_json['user_id']) && !empty($event_json['user_id'])) {
+			$user_id = $event_json['user_id'];
+			$offer_promotions_noti = $event_json['offer_promotions_noti'];
+			$friend_bday_noti = $event_json['friend_bday_noti'];
+			$purchase_noti = $event_json['purchase_noti'];
+			$like_noti = $event_json['like_noti'];
+			$profile_visit_noti = $event_json['profile_visit_noti'];
+			$new_message_noti = $event_json['new_message_noti'];
+			$match_noti = $event_json['match_noti'];
+			$recommend_noti = $event_json['recommend_noti'];
 
-		// check if data exists
-		$checkData = "SELECT * FROM user_notification";
-		$m = mysqli_query($conn,$checkData);
+			// check if data exists
+			$checkData = "SELECT * FROM user_notification where  user_id=".$user_id;
+			$m = mysqli_query($conn,$checkData);
 
-		if(mysqli_num_rows($m)) {
-			// update Data
-			$updateData = "UPDATE user_notification SET `offer_promotions_noti`='".$offer_promotions_noti."', `friend_bday_noti`='".$friend_bday_noti."', `purchase_noti`='".$purchase_noti."', `like_noti`='".$like_noti."', `profile_visit_noti`='".$profile_visit_noti."', `new_message_noti`='".$new_message_noti."',  `match_noti`='".$match_noti."',`recommend_noti`='".$recommend_noti."' where user_id=". $user_id;;
-			if(mysqli_query($conn,$updateData)) {
+//			var_dump(mysqli_num_rows($m)); die();
+
+			if(mysqli_num_rows($m)) {
+				// update Data
+				$updateData = "UPDATE user_notification SET `offer_promotions_noti`='".$offer_promotions_noti."', `friend_bday_noti`='".$friend_bday_noti."', `purchase_noti`='".$purchase_noti."', `like_noti`='".$like_noti."', `profile_visit_noti`='".$profile_visit_noti."', `new_message_noti`='".$new_message_noti."',  `match_noti`='".$match_noti."',`recommend_noti`='".$recommend_noti."' where user_id=". $user_id;;
+				if(mysqli_query($conn,$updateData)) {
+					$array_out = array();
+					$array_out[] =
+						array(
+							"response" =>"Notifications settings updated");
+					$output=array( "code" => "200", "msg" => $array_out);
+					print_r(json_encode($output, true));
+				} else {
+					$array_out = array();
+					$array_out[] =
+						array(
+							"response" =>"update Server issue");
+					$output=array( "code" => "201", "msg" => $array_out);
+					print_r(json_encode($output, true));
+				}
+			} else {
+				// Insert Data
+				$qrry_1="insert into user_notification(`user_id`,`offer_promotions_noti`,`friend_bday_noti`,`purchase_noti`,`like_noti`,`profile_visit_noti`,`new_message_noti`,`match_noti`,`recommend_noti`)values(";
+				$qrry_1.="".$user_id.",";
+				$qrry_1.="'".$offer_promotions_noti."',";
+				$qrry_1.="'".$friend_bday_noti."',";
+				$qrry_1.="'".$purchase_noti."',";
+				$qrry_1.="'".$like_noti."',";
+				$qrry_1.="'".$profile_visit_noti."',";
+				$qrry_1.="'".$new_message_noti."',";
+				$qrry_1.="'".$match_noti."',";
+				$qrry_1.="'".$recommend_noti."'";
+				$qrry_1.=")";
+//				var_dump($qrry_1); die();
+				if(mysqli_query($conn,$qrry_1)) {
+					$array_out = array();
+					$array_out[] =
+						array(
+							"response" =>"Notifications settings updated");
+					$output=array( "code" => "200", "msg" => $array_out);
+					print_r(json_encode($output, true));
+				} else {
+					$array_out = array();
+					$array_out[] =
+						array(
+							"response" =>"insert Server issue");
+					$output=array( "code" => "201", "msg" => $array_out);
+					print_r(json_encode($output, true));
+				}
+			}
+		} else {
+			$array_out = array();
+			$array_out[] =
+				array(
+					"response" =>"Json Parm are missing");
+			$output=array( "code" => "201", "msg" => $array_out);
+			print_r(json_encode($output, true));
+		}
+	}
+
+	function like_unlike() {
+		require_once("config.php");
+		$input = @file_get_contents("php://input");
+		$event_json = json_decode($input,true);
+
+//		$token = $_SERVER['HTTP_AUTHTOKEN'];
+
+		if(isset($event_json['user_id']) && !empty($event_json['user_id']) && isset($event_json['effective_user_id']) && !empty($event_json['effective_user_id'])) {
+			switch((int)$event_json['type']) {
+				case 0:
+					//dislike
+					$query = "INSERT INTO like_unlike (`action_profile`,`effect_profile`,`action_type`) VALUES (".$event_json['user_id'].",".$event_json['effective_user_id'].",".$event_json['type'].")";
+					mysqli_query($conn,$query);
+					if(mysqli_query($conn,$query)) {
+						$array_out = array();
+						$array_out[] =
+							array(
+								"response" =>"Pass");
+						$output=array( "code" => "200", "msg" => $array_out);
+						print_r(json_encode($output, true));
+					}  else {
+						$array_out = array();
+						$array_out[] =
+							array(
+								"response" =>"Server issue");
+						$output=array( "code" => "201", "msg" => $array_out);
+						print_r(json_encode($output, true));
+					}
+					break;
+				case 1:
+				case 2:
+					// 1 -> like; 2 -> SuperLike
+					$checkData = "Select * from like_unlike where action_profile=".$event_json['effective_user_id']." AND effect_profile=".$event_json['user_id']." Limit 1";
+					$cd = mysqli_query($conn,$checkData);
+					if(mysqli_num_rows($cd)) {
+						// Match Created
+						// get user device_token
+						$userData1 = "Select device_token from users where id =".$event_json['effective_user_id'];
+						$result1 = mysqli_query($conn,$userData1);
+						$device_token1 = mysqli_fetch_object($result1);
+
+						$userData2 = "Select device_token from users where id =".$event_json['user_id'];
+						$result2 = mysqli_query($conn,$userData2);
+						$device_token2 = mysqli_fetch_object($result2);
+
+						$this->push_notification($device_token1->device_token,'Profile Matched', array());
+						$this->push_notification($device_token2->device_token,'Profile Matched', array());
+
+						$update_query = "Update like_unlike SET match_profile= 1 where action_profile=".$event_json['effective_user_id']." AND effect_profile=".$event_json['user_id'];
+						if(mysqli_query($conn,$update_query)) {
+							$array_out = array();
+							$array_out[] =
+								array(
+									"response" =>"Congratulations its a match..");
+							$output=array( "code" => "200", "msg" => $array_out);
+							print_r(json_encode($output, true));
+						}  else {
+							$array_out = array();
+							$array_out[] =
+								array(
+									"response" =>"Server issue");
+							$output=array( "code" => "201", "msg" => $array_out);
+							print_r(json_encode($output, true));
+						}
+
+						// Notification For match
+
+					} else {
+						$insert_query = "INSERT INTO like_unlike (`action_profile`,`effect_profile`,`action_type`) VALUES (".$event_json['user_id'].",".$event_json['effective_user_id'].",".$event_json['type'].")";
+//						mysqli_query($conn,$insert_query);
+						if(mysqli_query($conn,$insert_query)) {
+							$array_out = array();
+							$array_out[] =
+								array(
+									"response" =>"profile liked");
+							$output=array( "code" => "200", "msg" => $array_out);
+							print_r(json_encode($output, true));
+						} else {
+							$array_out = array();
+							$array_out[] =
+								array(
+									"response" =>"Server issue");
+							$output=array( "code" => "201", "msg" => $array_out);
+							print_r(json_encode($output, true));
+						}
+					}
+					break;
+			}
+
+		} else {
+			$array_out = array();
+			$array_out[] =
+				array(
+					"response" =>"Json Parm are missing");
+			$output=array( "code" => "201", "msg" => $array_out);
+			print_r(json_encode($output, true));
+		}
+	}
+
+	function favourite() {
+		require_once("config.php");
+		$input = @file_get_contents("php://input");
+		$event_json = json_decode($input,true);
+
+		if(isset($event_json['user_id']) && !empty($event_json['user_id']) && isset($event_json['type']) && !empty($event_json['type'])) {
+			$user_id = $event_json['user_id'];
+			$type = $event_json['type'];
+			$array_out = array();
+			switch((int)$type) {
+				case 1:
+					$user_liked_you = "SELECT lu.action_profile,lu.effect_profile FROM like_unlike as lu where lu.effect_profile=".$user_id." AND (action_type = 1 OR action_type = 2) AND match_profile = 0";
+					$query = mysqli_query($conn,$user_liked_you);
+					break;
+				case 2:
+					$user_you_liked = "SELECT lu.action_profile,lu.effect_profile FROM like_unlike as lu where lu.action_profile=".$user_id." AND (action_type = 1 OR action_type = 2) AND match_profile = 0";
+					$query = mysqli_query($conn,$user_you_liked);
+
+					break;
+				case 3:
+					$match_profile = "SELECT lu.action_profile,lu.effect_profile FROM like_unlike as lu where (lu.action_profile=".$user_id." OR lu.effect_profile=".$user_id.") AND  (action_type = 1 OR action_type = 2) AND match_profile = 1";
+					$query = mysqli_query($conn,$match_profile);
+					break;
+			}
+			while($m=mysqli_fetch_array($query)) {
+				if($m['action_profile'] != $user_id) {
+					$userQuery = "SELECT * FROM users where users.id=".$m['action_profile']." LIMIT 1";
+					$uq = mysqli_query($conn,$userQuery);
+				} else {
+					$userQuery = "SELECT * FROM users where users.id=".$m['effect_profile']." LIMIT 1";
+					$uq = mysqli_query($conn,$userQuery);
+				}
+				$ud = mysqli_fetch_object($uq);
+				$array_out[] = array(
+					'image' => isset($ud->image1)&& !empty($ud->image1)?'https://clientstagingdev.com/how_about_now/uploads/'.$ud->id.'/'.$ud->image1:'',
+					'name' => $ud->first_name.' '.$ud->last_name,
+					'lat' =>$ud->lat,
+					'long' => $ud->long
+				);
+			}
+			$output=array( "code" => "200", "msg" => $array_out);
+			print_r(json_encode($output, true));
+		} else {
+			$array_out = array();
+			$array_out[] =
+				array(
+					"response" =>"Json Parm are missing");
+			$output=array( "code" => "201", "msg" => $array_out);
+			print_r(json_encode($output, true));
+		}
+	}
+
+	function getNotiStatus() {
+		require_once("config.php");
+		$input = @file_get_contents("php://input");
+		$event_json = json_decode($input,true);
+
+		if(isset($event_json['user_id']) && !empty($event_json['user_id'])) {
+			$user_id = $event_json['user_id'];
+			$array_out = array();
+			$userQuery = "SELECT * FROM user_notification where user_notification.user_id=".$user_id;
+			$uq = mysqli_query($conn,$userQuery);
+			$ud = mysqli_fetch_object($uq);
+//
+//			print_r($ud->offer_promotions_noti); die();
+			$array_out[] = array(
+				'offer_promotions_noti' => is_null($ud->offer_promotions_noti)?0:$ud->offer_promotions_noti,
+				'friend_bday_noti' => is_null($ud->friend_bday_noti)?0:$ud->friend_bday_noti,
+				'purchase_noti' => is_null($ud->purchase_noti)?0:$ud->purchase_noti,
+				'like_noti' => is_null($ud->like_noti)?0:$ud->like_noti,
+				'profile_visit_noti' => is_null($ud->profile_visit_noti)?0:$ud->profile_visit_noti,
+				'new_message_noti' => is_null($ud->new_message_noti)?0:$ud->new_message_noti,
+				'match_noti' => is_null($ud->match_noti)?0:$ud->match_noti,
+				'recommend_noti' => is_null($ud->recommend_noti)?0:$ud->recommend_noti,
+				'user_id' => $ud->user_id
+			);
+			$output=array( "code" => "200", "msg" => $array_out);
+			print_r(json_encode($output, true));
+		} else {
+			$array_out = array();
+			$array_out[] =
+				array(
+					"response" =>"Json Parm are missing");
+			$output=array( "code" => "201", "msg" => $array_out);
+			print_r(json_encode($output, true));
+		}
+	}
+
+	function getProfileInterest() {
+		require_once("config.php");
+		$input = @file_get_contents("php://input");
+		$event_json = json_decode($input,true);
+
+		if(isset($event_json['user_id']) && !empty($event_json['user_id'])) {
+			$user_id = $event_json['user_id'];
+			$array_out = array();
+			// get category List
+			$categoryQuery = "SELECT * FROM interest_category ORDER BY sort_order ASC";
+			$cq = mysqli_query($conn,$categoryQuery);
+			$cd = mysqli_fetch_all($cq, MYSQLI_ASSOC);
+
+			foreach($cd as $cd) {
+				// user Data
+				$userInterests = "SELECT * FROM user_interests where user_id =".$user_id." AND cat_id".$cd['id']." LIMIT 1";
+				$ui = mysqli_query($conn,$userInterests);
+				$ud = mysqli_fetch_object($ui);
+
+				$array_out[] = array(
+					'cat_id' => $cd['id'],
+					'cat_name' => $cd['category_name'],
+					'cat_image' => $cd['image'],
+					'user_data' => isset($ud->interests) && !empty($ud->interests)?explode(",",$ud->interests):'',
+				);
+			}
+//			die();
+			$output=array( "code" => "200", "msg" => $array_out);
+			print_r(json_encode($output, true));
+		} else {
+			$array_out = array();
+			$array_out[] =
+				array(
+					"response" =>"Json Parm are missing");
+			$output=array( "code" => "201", "msg" => $array_out);
+			print_r(json_encode($output, true));
+		}
+	}
+
+	function updateProfileInterest() {
+		require_once("config.php");
+		$input = @file_get_contents("php://input");
+		$event_json = json_decode($input,true);
+
+		if(isset($event_json['user_id']) && !empty($event_json['user_id'])) {
+			$user_id = $event_json['user_id'];
+			$user_interest = $event_json['user_interest'];
+			$array_out = array();
+			foreach ($user_interest as $value) {
+				$userData = implode(",",$value['user_data']);
+				// check if data exits
+				$checkData = "SELECT * FROM user_interests where user_id=".$user_id." AND cat_id=".$value['cat_id'];
+				$cd = mysqli_query($conn,$checkData);
+				if(mysqli_num_rows($cd)) {
+					// Update Data
+					$updateQuery = "Update user_interests SET `interests`='".$userData."' where user_id=".$user_id." AND cat_id=".$value['cat_id'];
+					if(!mysqli_query($conn,$updateQuery)) {
+						$array_out[] =
+							array(
+								"response" =>"Server Error");
+						exit();
+					}
+				} else {
+					// insert Data
+					$insertQuery = "INSERT INTO user_interests (`user_id`,`cat_id`,`interests`) VALUES (".$user_id.",".$value['cat_id'].",'".$userData."')";
+					if(!mysqli_query($conn,$insertQuery)) {
+						$array_out[] =
+							array(
+								"response" =>"Server Error");
+						exit();
+					}
+				}
+			}
+			$array_out[] =
+				array(
+					"response" =>"Interest Updated Successfully");
+
+			$output=array( "code" => "200", "msg" => $array_out);
+			print_r(json_encode($output, true));
+		} else {
+			$array_out = array();
+			$array_out[] =
+				array(
+					"response" =>"Json Parm are missing");
+			$output=array( "code" => "201", "msg" => $array_out);
+			print_r(json_encode($output, true));
+		}
+	}
+
+	function socialLogin() {
+		require_once("config.php");
+		$input = @file_get_contents("php://input");
+		$event_json = json_decode($input,true);
+		if ((isset($event_json['first_name']) && isset($event_json['email'])))
+		{
+			$first_name=htmlspecialchars(strip_tags($event_json['first_name'] , ENT_QUOTES));
+			$last_name=htmlspecialchars(strip_tags($event_json['last_name'] , ENT_QUOTES));
+			$device_token=htmlspecialchars_decode(stripslashes($event_json['device_token']));
+			$lat=htmlspecialchars_decode(stripslashes($event_json['lat']));
+			$lng=htmlspecialchars_decode(stripslashes($event_json['lng']));
+			$device=htmlspecialchars_decode(stripslashes($event_json['device']));
+			$email=htmlspecialchars_decode(stripslashes($event_json['email']));
+			$fb_id=htmlspecialchars_decode(stripslashes($event_json['fb_id']));
+			$profile_type='user';
+
+			// if data exits with that email
+			$checkData = "SELECT * FROM users where email='$email'";
+			$cd = mysqli_query($conn,$checkData);
+			if(mysqli_num_rows($cd)) {
+				// update data and login
+				$rd = mysqli_fetch_object($cd);
+				$updateData = " UPDATE users SET `lat`='".$lat."', `long`='".$lng."', `device_token`='".$device_token."', `device`='".$device."', `fb_id`='".$fb_id."' where id=". $rd->id;
+				$update = mysqli_query($conn, $updateData);
+
 				$array_out = array();
 				$array_out[] =
 					array(
-						"response" =>"Notifications settings updated");
-				$output=array( "code" => "200", "msg" => $array_out);
+						"user_id" => $rd->id,
+						"first_name" => $rd->first_name,
+						"last_name" => $rd->last_name,
+						"device_token" => $device_token,
+						"device" => $device,
+						"lat" => $lat,
+						"lng" => $lng,
+						"email" => $email,
+						"token" => 'abcTest'
+					);
+
+				$output = array("code" => "200", "msg" => $array_out);
 				print_r(json_encode($output, true));
 			} else {
+				// insert Data and Login
+				$qrry_1="insert into users(`first_name`,`last_name`,`profile_type`,`lat`,`long`,`device`,`device_token`,`email`,`fb_id`)values(";
+				$qrry_1.="'".$first_name."',";
+				$qrry_1.="'".$last_name."',";
+				$qrry_1.="'".$profile_type."',";
+				$qrry_1.="'".$lat."',";
+				$qrry_1.="'".$lng."',";
+				$qrry_1.="'".$device."',";
+				$qrry_1.="'".$device_token."',";
+				$qrry_1.="'".$email."',";
+				$qrry_1.="'".$fb_id."'";
+				$qrry_1.=")";
+				if($m = mysqli_query($conn,$qrry_1))
+				{
+					$array_out = array();
+					$array_out[] =
+						array(
+							"first_name" => $first_name,
+							"last_name" => $last_name,
+							"device_token" => $device_token,
+							"device" => $device,
+							"lat" => $lat,
+							"lng" => $lng,
+							"email" => $email,
+							"token" => 'abcTest',
+							"user_id" => mysqli_insert_id($conn)
+						);
+					$output=array( "code" => "200", "msg" => $array_out);
+					print_r(json_encode($output, true));
+				}
+				else
+				{
+					$array_out = array();
+					$array_out[] = array("response" =>"problem in signup");
+
+					$output=array( "code" => "201", "msg" => $array_out);
+					print_r(json_encode($output, true));
+				}
+			}
+		} else {
+			$array_out = array();
+
+			$array_out[] =
+				array(
+					"response" => "Json Param are missing");
+
+			$output = array("code" => "201", "msg" => $array_out);
+			print_r(json_encode($output, true));
+		}
+	}
+
+	function nearby_story_list() {
+		require_once("config.php");
+		$input = @file_get_contents("php://input");
+		$event_json = json_decode($input,true);
+		if(isset($event_json['user_id']) && !empty($event_json['user_id'])) {
+			$user_id = $event_json['user_id'];
+			// fetch Friend List
+			$sql = "SELECT action_profile,effect_profile FROM `like_unlike` where (action_profile = $user_id OR effect_profile =$user_id) AND match_profile=1";
+			$query = mysqli_query($conn,$sql);
+
+			$array_out = array();
+			if(mysqli_num_rows($query)){
+				while($row=mysqli_fetch_array($query)){
+					// Check stories
+					if($user_id != $row['action_profile']) {
+						$friendUser = $row['action_profile'];
+					} else {
+						$friendUser = $row['effect_profile'];
+					}
+					$userStories ="Select * from `nearby_stories` inner join users on users.id = nearby_stories.user_id where user_id=$friendUser";
+					$story_query = mysqli_query($conn,$userStories);
+					if(mysqli_num_rows($story_query)){
+						while($data=mysqli_fetch_array($story_query)){
+							$array_out[] = array(
+								"image" => 'https://clientstagingdev.com/how_about_now'.$data['image'],
+								'user_id'=> $data['user_id'],
+								'user_name' => $data['first_name'].' '.$data['last_name']
+							);
+						}
+					}
+				}
+				$output=array( "code" => "200", "msg" => $array_out);
+				print_r(json_encode($output, true));
+
+			}else {
+				$array_out = array();
+				$array_out[] = array("response" =>"No friend list found");
+
+				$output=array( "code" => "201", "msg" => $array_out);
+				print_r(json_encode($output, true));
+			}
+
+		} else {
+			$array_out = array();
+			$array_out[] =
+				array(
+					"response" => "Json Param are missing");
+			$output = array("code" => "201", "msg" => $array_out);
+			print_r(json_encode($output, true));
+		}
+	}
+
+	function nearby_story_add() {
+		require_once("config.php");
+		$user_id = $_POST['user_id'];
+		if(isset($user_id) && !empty($user_id)){
+			if($_FILES['image']['size']> 0){
+				// upload image
+				$target_path = "../uploads/story_data/" . $_POST['user_id'] . "/";
+				if (!is_dir($target_path)) {
+					mkdir($target_path, 0777);
+				}
+				$target_path = $target_path . basename($_FILES['image']['name']);
+//				var_dump($target_path); die();
+				if (move_uploaded_file($_FILES['image']['tmp_name'], $target_path)) {
+					$file_name = "/uploads/story_data/" . $_POST['user_id'] . "/".$_FILES['name'];
+					$qrry_1 ="INSERT into nearby_stories (`user_id`,`image`) VALUES ($user_id,'" .$file_name."')";
+					mysqli_query($conn, $qrry_1);
+//					var_dump($qrry_1); die();
+					$array_out = array();
+					$array_out[] = array("response" => "story uploaded successfully");
+					$output = array("code" => "200", "msg" => $array_out);
+					print_r(json_encode($output, true));
+				} else {
+					$array_out = array();
+					$array_out[] = array("response" => "File upload failed");
+					$output = array("code" => "201", "msg" => $array_out);
+					print_r(json_encode($output, true));
+				}
+			} else{
 				$array_out = array();
 				$array_out[] =
 					array(
-						"response" =>"update Server issue");
-				$output=array( "code" => "201", "msg" => $array_out);
+						"response" => "image param is required");
+				$output = array("code" => "201", "msg" => $array_out);
 				print_r(json_encode($output, true));
 			}
 		} else {
-			// Insert Data
-			$qrry_1="insert into user_notification(`user_id`,`offer_promotions_noti`,`friend_bday_noti`,`purchase_noti`,`like_noti`,`profile_visit_noti`,`new_message_noti`,`match_noti`,`recommend_noti`)values(";
-			$qrry_1.="'".$user_id."',";
-			$qrry_1.="'".$offer_promotions_noti."',";
-			$qrry_1.="'".$friend_bday_noti."',";
-			$qrry_1.="'".$purchase_noti."',";
-			$qrry_1.="'".$like_noti."',";
-			$qrry_1.="'".$profile_visit_noti."',";
-			$qrry_1.="'".$new_message_noti."',";
-			$qrry_1.="'".$match_noti."',";
-			$qrry_1.="'".$recommend_noti."'";
-			$qrry_1.=")";
-			if(mysqli_query($conn,$qrry_1)) {
-				$array_out = array();
-				$array_out[] =
-					array(
-						"response" =>"Notifications settings updated");
-				$output=array( "code" => "200", "msg" => $array_out);
-				print_r(json_encode($output, true));
-			} else {
-				$array_out = array();
-				$array_out[] =
-					array(
-						"response" =>"insert Server issue");
-				$output=array( "code" => "201", "msg" => $array_out);
-				print_r(json_encode($output, true));
-			}
+			$array_out = array();
+			$array_out[] =
+				array(
+					"response" => "Json Param are missing");
+			$output = array("code" => "201", "msg" => $array_out);
+			print_r(json_encode($output, true));
 		}
-	} else {
-		$array_out = array();
-		$array_out[] =
-			array(
-				"response" =>"Json Parm are missing");
-		$output=array( "code" => "201", "msg" => $array_out);
-		print_r(json_encode($output, true));
 	}
 
+	function push_notification($device_id,$message,$data){
+
+	//API URL of FCM
+	$url = 'https://fcm.googleapis.com/fcm/send';
+	$api_key = 'AAAAdQGU1n0:APA91bE7MPTgTzO2gL1nZAwEHQW3ALuDX_fFORiSqyTtjtdkn1ZiOydIn9Q04n_qOkGoMM40B5JcvgwMS02kgVI45CVyKFJX4X4yGbyyu4LSLr2i-0YNeSYuHpsDczTXv6sPXT4CQOk_';
+
+	$fields = array (
+		'registration_ids' => array (
+			$device_id
+		),
+		'data' => array (
+			"message" => $message
+		)
+	);
+
+	//header includes Content type and api key
+	$headers = array(
+		'Content-Type:application/json',
+		'Authorization:key='.$api_key
+	);
+
+	$ch = curl_init();
+	curl_setopt($ch, CURLOPT_URL, $url);
+	curl_setopt($ch, CURLOPT_POST, true);
+	curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+	curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($fields));
+	$result = curl_exec($ch);
+	curl_close($ch);
+	if ($result === FALSE) {
+		return False;
+	} else {
+		return true;
+	}
 }
 
-	function deleteImages()
-	{
-		require_once("config.php");
-		$input = @file_get_contents("php://input");
-	    $event_json = json_decode($input,true);
-		//print_r($event_json);
-		//0= owner  1= company 2= ind mechanic
-		
-		if(isset($event_json['fb_id']) && isset($event_json['image_link']) )
-		{
-			$fb_id=htmlspecialchars(strip_tags($event_json['fb_id'] , ENT_QUOTES));
-			$image_link=stripslashes(strip_tags($event_json['image_link'] ));
-			
-			
-			mysqli_query($conn,"update users where fb_id='".$fb_id."'   ");
-				
-	    	$qrry_1="select * from users WHERE fb_id ='".$fb_id."' and image2='".$image_link."' OR image3='".$image_link."' OR image4='".$image_link."' OR image5='".$image_link."' OR image6='".$image_link."' ";
-			$log_in_rs=mysqli_query($conn,$qrry_1);
-			
-			if(mysqli_num_rows($log_in_rs))
-			{
-			    $rd=mysqli_fetch_object($log_in_rs);
-			    
-			    if($rd->image2==$image_link)
-			    {
-			        $colum_name="image2";
-			    }
-			    else
-			    if($rd->image3==$image_link)
-			    {
-			        $colum_name="image3";
-			    }
-			    else
-			    if($rd->image4==$image_link)
-			    {
-			        $colum_name="image4";
-			    }
-			    else
-			    if($rd->image5==$image_link)
-			    {
-			        $colum_name="image5";
-			    }
-			    else
-			    if($rd->image6==$image_link)
-			    {
-			        $colum_name="image6";
-			    }
-			    
-			    
-			    $qrry_1="update users SET $colum_name ='' WHERE fb_id ='".$fb_id."' ";
-    			if(mysqli_query($conn,$qrry_1))
-    			{
-    			    $array_out = array();
-    					
-            		 $array_out[] = 
-            			array(
-            			"response" =>"success");
-            		
-            		$output=array( "code" => "200", "msg" => $array_out);
-            		print_r(json_encode($output, true));
-    			}
-    			else
-    			{
-    			    $array_out = array();
-    					
-            		 $array_out[] = 
-            			array(
-            			"response" =>"problem in delete");
-            		
-            		$output=array( "code" => "201", "msg" => $array_out);
-            		print_r(json_encode($output, true));
-    			}
-			} 
-			
-			
-		}
-		else
-		{
-			$array_out = array();
-					
-					 $array_out[] = 
-						array(
-						"response" =>"Json Parem are missing");
-					
-					$output=array( "code" => "201", "msg" => $array_out);
-					print_r(json_encode($output, true));
-		}
-		
-	}
-
-	function show_or_hide_profile()
-	{
-	    
-	    require_once("config.php");
-	    $input = @file_get_contents("php://input");
-	    $event_json = json_decode($input,true);
-		//print_r($event_json);
-		//0= owner  1= company 2= ind mechanic
-		
-		if(isset($event_json['fb_id']) && isset($event_json['status']) )
-		{
-			$fb_id=htmlspecialchars(strip_tags($event_json['fb_id'] , ENT_QUOTES));
-			$status=htmlspecialchars(strip_tags($event_json['status'] , ENT_QUOTES));
-		    
-		    $hide_age=stripslashes(strip_tags($event_json['hide_age']));
-            $hide_location=stripslashes(strip_tags($event_json['hide_location']));
-
-			$qrry_1="update users SET hide_me ='".$status."' , hide_age='".$hide_age."' , hide_location='".$hide_location."' WHERE fb_id ='".$fb_id."' ";
-			if(mysqli_query($conn,$qrry_1))
-			{
-			    $array_out = array();
-					
-        		 $array_out[] = 
-        			array(
-        			"response" =>"success");
-        		
-        		$output=array( "code" => "200", "msg" => $array_out);
-        		print_r(json_encode($output, true));
-			}
-			else
-			{
-			    $array_out = array();
-					
-        		 $array_out[] = 
-        			array(
-        			"response" =>"problem in uploading");
-        		
-        		$output=array( "code" => "201", "msg" => $array_out);
-        		print_r(json_encode($output, true));
-			}
-			
-			
-		}
-	    
-	    
-	}
-	
 	//admin panel functions
-	
 	function banned_user()
 	{
 	    require_once("config.php");
