@@ -12,7 +12,7 @@ if(@$_GET['ViewProfile']=="ok")
     );
     
     $data = array(
-        "fb_id" => $_GET['id']
+        "id" => $_GET['id']
     );
     
     $ch = curl_init( $baseurl.'getProfilePictures' );
@@ -25,13 +25,7 @@ if(@$_GET['ViewProfile']=="ok")
     $return = curl_exec($ch);
     
     $json_data = json_decode($return, true);
-    //var_dump($return);
-    
-    // echo"<pre>";
-    
-    // print_r($json_data);
-    // echo"</pre>";
-    
+
     $curl_error = curl_error($ch);
     $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     
@@ -39,8 +33,8 @@ if(@$_GET['ViewProfile']=="ok")
             
             <div class="tab">
               <button class="tablinks" onclick="openCity(event, 'userinfo')" id="defaultOpen">User Info</button>
-              <button class="tablinks" onclick="openCity(event, 'like' ,'<?php echo $_GET['id'];?>')">Likes <span class='count'><?php echo $_GET['like']; ?></span></button>
-              <button class="tablinks" onclick="openCity(event, 'dislike' ,'<?php echo $_GET['id'];?>')">Dislikes <span class='count'><?php echo $_GET['dislike']; ?></span></button>
+              <button class="tablinks" onclick="openCity(event, 1 ,'<?php echo $_GET['id'];?>')">Likes <span class='count'><?php echo $_GET['like']; ?></span></button>
+              <button class="tablinks" onclick="openCity(event, 0 ,'<?php echo $_GET['id'];?>')">Dislikes <span class='count'><?php echo $_GET['dislike']; ?></span></button>
               <button class="tablinks" onclick="openCity(event, 'matched' ,'<?php echo $_GET['id'];?>')">Matched </button>
               <button class="tablinks" onclick="openCity(event, 'gallary' ,'<?php echo $_GET['id'];?>')" >Gallary</button>
             </div>
@@ -202,19 +196,19 @@ if(@$_GET['ViewProfile']=="ok")
               
             </div>
             
-            <div id="like" class="tabcontent">
+            <div id="1" class="tabcontent">
               <h3>Likes</h3>
-              <p>Paris is the capital of France.</p> 
+              <p>No likes so far.</p>
             </div>
             
             <div id="matched" class="tabcontent">
-              <h3>Likes</h3>
-              <p>Paris is the capital of France.</p> 
+              <h3>Match</h3>
+              <p>No match so far.</p>
             </div>
             
-            <div id="dislike" class="tabcontent">
+            <div id="0" class="tabcontent">
               <h3>Dislikes</h3>
-              <p>Tokyo is the capital of Japan.</p>
+              <p>No dislikes so far.</p>
             </div>
             
             <div id="gallary" class="tabcontent">
@@ -287,7 +281,7 @@ if(@$_GET['getlikes']=="ok")
 
 	$data = array(
 	    "fb_id" => $_GET['id'],
-	    "status" => "like"
+	    "status" => 1
 	);
    	$ch = curl_init( $baseurl.'getProfilelikes' );
 
@@ -308,7 +302,7 @@ if(@$_GET['getlikes']=="ok")
 	{
         ?>
         
-            <div onclick="ViewProfile('<?php echo $val['profile_info']['fb_id']?>','<?php echo $val['profile_info']['like_count']?>','<?php echo $val['profile_info']['dislike_count']?>');" style="width:110px; cursor: pointer; height:100px; border-radius: 5px; border: solid 1px #8080801f; float:left; padding-top:10px; margin-right: 8px; margin-bottom: 8px;">
+            <div onclick="ViewProfile('<?php echo $val['profile_info']['id']?>','<?php echo $val['profile_info']['like_count']?>','<?php echo $val['profile_info']['dislike_count']?>');" style="width:110px; cursor: pointer; height:100px; border-radius: 5px; border: solid 1px #8080801f; float:left; padding-top:10px; margin-right: 8px; margin-bottom: 8px;">
                 <img src="<?php echo $val['profile_info']['image1']?>" style="border-radius: 100%; width: 50px; height: 50px;">
                 <h3 style="font-weight:400; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;"><?php echo $val['profile_info']['first_name']?> <?php echo $val['profile_info']['last_name']?></h3>
             </div>
@@ -331,8 +325,8 @@ if(@$_GET['getdislikes']=="ok")
 	);
 
 	$data = array(
-	    "fb_id" => $_GET['id'],
-	    "status" => "dislike"
+	    "id" => $_GET['id'],
+	    "status" => 0
 	);
    	$ch = curl_init( $baseurl.'getProfilelikes' );
 
@@ -380,7 +374,7 @@ if(@$_GET['getmatchedprofile']=="ok")
 	);
 
 	$data = array(
-	    "fb_id" => $_GET['id']
+	    "id" => $_GET['id']
 	);
    	$ch = curl_init( $baseurl.'getmatchedprofiles' );
 
@@ -399,10 +393,11 @@ if(@$_GET['getmatchedprofile']=="ok")
     echo '<div';
 	foreach( $json_data['msg'] as $str => $val ) 
 	{
+//	    var_dump($val);die();
         ?>
                 
             
-                <div onclick="ViewProfile('<?php echo $val['profile_info']['fb_id']?>','<?php echo $val['profile_info']['like_count']?>','<?php echo $val['profile_info']['dislike_count']?>');"  style="width:110px; cursor: pointer; height:100px; border-radius: 5px; border: solid 1px #8080801f; float:left; padding-top:10px; margin-right: 8px; margin-bottom: 8px;">
+                <div onclick="ViewProfile('<?php echo $val['profile_info']['id']?>','<?php echo $val['profile_info']['like_count']?>','<?php echo $val['profile_info']['dislike_count']?>');"  style="width:110px; cursor: pointer; height:100px; border-radius: 5px; border: solid 1px #8080801f; float:left; padding-top:10px; margin-right: 8px; margin-bottom: 8px;">
                     <img src="<?php echo $val['profile_info']['image1']?>" style="border-radius: 100%; width: 50px; height: 50px;">
                     <h3 style="font-weight:400;"><?php echo $val['profile_info']['first_name']?> <?php echo $val['last_name']?></h3>
                 </div>
@@ -497,7 +492,7 @@ if(@$_GET['checkmatch']=="ok")
 	);
 
 	$data = array(
-	    "fb_id" => $_GET['id']
+	    "id" => $_GET['id']
 	);
    	$ch = curl_init( $baseurl.'myMatch' );
     
@@ -614,7 +609,7 @@ if(@$_GET['startChat']=="ok")
 	);
     
     $data = array(
-	    "fb_id" => $my_id,
+	    "id" => $my_id,
 	    "effected_id"=> $fb_id
 	);
    	$ch = curl_init( $baseurl.'firstchat' );

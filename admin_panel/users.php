@@ -244,7 +244,7 @@ if( isset($_SESSION['id']))
 			echo "<table id='data1' class='display' style='width:100%''>
 			<thead>
 	            <tr>
-	                <th>Facebook ID</th>
+	                <th>S.No.</th>
 	                <th>First Name</th>
 	                <th>Age</th>
 	                <th>Gender</th>
@@ -261,8 +261,8 @@ if( isset($_SESSION['id']))
 				?>
 				<tr style=" text-align: center;">
 					<td>
-						<?php 
-							echo $val['fb_id']; 
+						<?php
+							echo ++$str;
 						?>
 					</td>
 					<td style="line-height: 20px;">
@@ -321,29 +321,16 @@ if( isset($_SESSION['id']))
 						?>
 					</td>
 					<td style="letter-spacing: 5px;">
-					    <span class="fas fa-info-circle" style="font-size: 20px; color: #ff5e62; cursor: pointer; " onclick="ViewProfile('<?php echo $val['fb_id']; ?>','<?php echo $val['like_count']; ?>','<?php echo $val['dislike_count']; ?>');"></span>
-						
-						
-						<span class="fas fa-heart" style="font-size: 20px; color: #ff5e62; cursor: pointer; " onclick="matchnow('<?php echo $val['fb_id']; ?>')" ></span>
+					    <span class="fas fa-info-circle" style="font-size: 20px; color: #46A1B5; cursor: pointer; " onclick="ViewProfile('<?php echo $val['id']; ?>','<?php echo $val['like_count']; ?>','<?php echo $val['dislike_count']; ?>');"></span>
+						<span class="fas fa-heart" style="font-size: 20px; color: #F67A2D; cursor: pointer; " onclick="matchnow('<?php echo $val['fb_id']; ?>')" ></span>
 					</td>
-					<!-- <td>
-						<a href="#" onclick="edit_quote('<?php echo $val['id']; ?>','<?php echo $val['category']; ?>')" title="Edit" style=" text-decoration: none; margin-right: 10px;">
-							<img src="img/edit.png" alt="track" width="15px">
-						</a>
-
-						<a href="" title="Delete"  onclick="return confirm('Are you sure?');"  style=" text-decoration: none; margin-right: 10px;">
-							<img src="img/delete.png" alt="track" width="15px">
-						</a>
-
-					</td> -->
-					
 				</tr>
 				<?php
 			}
 			echo "</tbody>
 			<tfoot>
 	            <tr>
-	                <th>Facebook ID</th>
+	                <th>S.No.</th>
 	                <th>First Name</th>
 	                <th>Age</th>
 	                <th>Gender</th>
@@ -513,14 +500,14 @@ if( isset($_SESSION['id']))
             evt.currentTarget.className += " active";
             
             
-            if(cityName=="like")
+            if(cityName==0)
             {
-                getlikes(profileID,cityName);
+                getlikes(profileID,1);
             }
             else
-            if(cityName=="dislike")
+            if(cityName==1)
             {
-                getdislikes(profileID,cityName);
+                getdislikes(profileID,0);
             }
             else
             if(cityName=="matched")

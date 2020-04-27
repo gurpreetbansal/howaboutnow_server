@@ -9,7 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
 	<!-- Search Tags -->
-	<title>Binder | Admin Panel</title>
+	<title>How About Now? | Admin Panel</title>
 	
     
     <link rel="stylesheet" type="text/css" href="css/style.css?<?php echo time();?>" />
@@ -73,7 +73,7 @@
 					<div class="logo left">
 						<a href="index.php" style="text-decoration: none !important;">
 						    <img src="img/logo.png" alt="d track" style="height:40px;" />
-						    <h1 style="background: -webkit-linear-gradient(#ff5e62, #ff5e62); -webkit-background-clip: text; -webkit-text-fill-color: transparent;position: relative; margin:-37px 0 0 45px;font-size: 32px; ">Binder Portal</h1>
+<!--						    <h1 style="background: -webkit-linear-gradient( #F67A2D, #F67A2D); -webkit-background-clip: text; -webkit-text-fill-color: transparent;position: relative; margin:-37px 0 0 45px;font-size: 32px; ">How About Now ?</h1>-->
 						</a>
 					</div>
 					<div class="right navbar">
@@ -110,7 +110,7 @@
 							<?php } else { ?>
 								
 								<li>
-									<a href="javascript:;" onClick="popup('login')">
+									<a href="javascript:void(0);" onClick="popup('login')">
 										Login / Sign Up 
 									</a>
 									
