@@ -46,7 +46,11 @@
     
     			document.getElementById("PopupParent").style.display="none";
     
-    		} 
+    		}
+
+    		function submitData() {
+    	        var val = $('form').serialize();
+            }
     		
     		
             

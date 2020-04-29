@@ -30,14 +30,6 @@ require_once("config.php");
 				if( $_GET['p'] == "users" ) { //users
 					include("users.php");
 				} //users = end
-
-				if( $_GET['p'] == "reviewPictures" ) { //match_profile
-					include("reviewPictures.php");
-				} //match_profile = end
-				
-					if( $_GET['p'] == "reported_users" ) { //match_profile
-					include("reported_users.php");
-				} //match_profile = end
 				
 				if( $_GET['p'] == "change_password" ) { //change_password
 					include("change_password.php");
@@ -46,21 +38,14 @@ require_once("config.php");
 				if( $_GET['p'] == "notifications" ) { //notifications
 					include("notifications.php");
 				} //notifications = end
-				
-				if( $_GET['p'] == "inbox" ) { //notifications
-					include("inbox.php");
-				}
-				
-				if( $_GET['p'] == "fakeProfile" ) { 
-					include("fakeProfile.php");
-				}
-				
-				if( $_GET['p'] == "addfakeProfile" ) { 
-					include("addFakeProfile.php");
-				}
 
+                if( $_GET['p'] == "category_list" ) { //category_list
+                    include("category_list.php");
+                } //category_list = end
 
-				
+                if( $_GET['p'] == "profile_question" ) { //profile_question
+                    include("profile_question.php");
+                } //profile_question = end
 
 		} //inner pages = end ?>
 	</div>

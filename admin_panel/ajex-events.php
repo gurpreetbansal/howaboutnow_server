@@ -1,7 +1,6 @@
 <?php
 @require_once("config.php");
 
-
 if(@$_GET['ViewProfile']=="ok") 
 {   
     
@@ -25,6 +24,8 @@ if(@$_GET['ViewProfile']=="ok")
     $return = curl_exec($ch);
     
     $json_data = json_decode($return, true);
+
+//    var_dump($json_data);
 
     $curl_error = curl_error($ch);
     $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -212,60 +213,66 @@ if(@$_GET['ViewProfile']=="ok")
             </div>
             
             <div id="gallary" class="tabcontent">
-                
-                
-                <div style="width:30%; float:left; padding:15px 5px;">
-            
-                <?php 
-    		
-    			if($_GET['id']!="")
-    			{
-    				?>
-    					<div style="background: url('<?php echo $json_data['msg'][0]['image1']; ?>');  background-size: cover;" class="preview_images_box" onclick="document.getElementById('preview_img').style.background = 'url(<?php echo $json_data['msg'][0]['image1'];?>)'; document.getElementById('preview_img').style.backgroundSize ='cover';  ">&nbsp;</div>
-    				<?php
-    			}
-    			if($json_data['msg'][0]['image2']!="")
-    			{
-    				?>
-    					<div style="background: url('<?php echo $json_data['msg'][0]['image2'];?>');  background-size: cover;" class="preview_images_box"  onclick="document.getElementById('preview_img').style.background = 'url(<?php echo $json_data['msg'][0]['image2'] ?>)'; document.getElementById('preview_img').style.backgroundSize ='cover';  "></div>
-    				<?php
-    			}
-    			if($json_data['msg'][0]['image3']!="")
-    			{
-    				?>
-    					<div style="background: url('<?php echo $json_data['msg'][0]['image3'];?>');  background-size: cover;" class="preview_images_box"  onclick="document.getElementById('preview_img').style.background = 'url(<?php echo $json_data['msg'][0]['image3'] ?>)'; document.getElementById('preview_img').style.backgroundSize ='cover';  "></div>
-    				<?php
-    			}
-    			if($json_data['msg'][0]['image4']!="")
-    			{
-    				?>
-    					<div style="background: url('<?php echo $json_data['msg'][0]['image4'];?>');  background-size: cover;" class="preview_images_box"  onclick="document.getElementById('preview_img').style.background = 'url(<?php echo $json_data['msg'][0]['image4'] ?>)'; document.getElementById('preview_img').style.backgroundSize ='cover';  "></div>
-    				<?php
-    			}
-    			if($json_data['msg'][0]['image5']!="")
-    			{
-    				?>
-    					<div style="background: url('<?php echo $json_data['msg'][0]['image5'];?>');  background-size: cover;" class="preview_images_box"  onclick="document.getElementById('preview_img').style.background = 'url(<?php echo $json_data['msg'][0]['image5'] ?>)'; document.getElementById('preview_img').style.backgroundSize ='cover';  "></div>
-    				<?php
-    			}
-    			if($json_data['msg'][0]['image6']!="")
-    			{
-    				?>
-    					<div style="background: url('<?php echo $json_data['msg'][0]['image6'];?>');  background-size: cover;" class="preview_images_box"  onclick="document.getElementById('preview_img').style.background = 'url(<?php echo $json_data['msg'][0]['image6'] ?>)'; document.getElementById('preview_img').style.backgroundSize ='cover';  "></div>
-    				<?php
-    			}
-    		
-    		?>
+
+                <div id="images-box">
+                <?php if($json_data['msg'][0]['image1']!="")
+                    { ?>
+                    <div class="holder">
+                        <div id="image-1" class="image-lightbox">
+                            <span class="close"><a href="#">X</a></span>
+                            <img src="<?=$json_data['msg'][0]['image1'];?>" alt="earth!">
+                            <a class="expand" href="#image-1"></a>
+                        </div>
+                    </div>
+                    <?php }
+                    if($json_data['msg'][0]['image2']!="") { ?>
+                    <div class="holder">
+                        <div id="image-2" class="image-lightbox">
+                            <span class="close"><a href="#">X</a></span>
+                            <img src="<?=$json_data['msg'][0]['image2'];?>" alt="earth!">
+                            <a class="expand" href="#image-2"></a>
+                        </div>
+                    </div>
+                    <?php }
+                    if ($json_data['msg'][0]['image3']!="") { ?>
+                    <div class="holder">
+                        <div id="image-3" class="image-lightbox">
+                            <span class="close"><a href="#">X</a></span>
+                            <img src="<?=$json_data['msg'][0]['image3'];?>" alt="earth!">
+                            <a class="expand" href="#image-3"></a>
+                        </div>
+                    </div>
+                    <?php }
+                    if($json_data['msg'][0]['image4']!="") { ?>
+                        <div class="holder">
+                            <div id="image-4" class="image-lightbox">
+                                <span class="close"><a href="#">X</a></span>
+                                <img src="<?=$json_data['msg'][0]['image4'];?>" alt="earth!">
+                                <a class="expand" href="#image-4"></a>
+                            </div>
+                        </div>
+                    <?php }
+                    if($json_data['msg'][0]['image5']!="") { ?>
+                        <div class="holder">
+                            <div id="image-5" class="image-lightbox">
+                                <span class="close"><a href="#">X</a></span>
+                                <img src="<?=$json_data['msg'][0]['image5'];?>" alt="earth!">
+                                <a class="expand" href="#image-5"></a>
+                            </div>
+                        </div>
+                    <?php }
+                    if($json_data['msg'][0]['image6']!="") { ?>
+                        <div class="holder">
+                            <div id="image-6" class="image-lightbox">
+                                <span class="close"><a href="#">X</a></span>
+                                <img src="<?=$json_data['msg'][0]['image6'];?>" alt="earth!">
+                                <a class="expand" href="#image-6"></a>
+                            </div>
+                        </div>
+                    <?php } ?>
+                </div>
+                <div style="clear:both;"></div>
             </div>
-            <div id="preview_img" style=" width:420px; border: solid 1px #FB3C73; border-radius: 5px; display: inline-block; float:left; height:420px; background:url('<?php echo $json_data['msg'][0]['image1']; ?>'); background-size:cover;  margin-top: 15px;"></div>
-    		<div style="clear:both;"></div>
-			 
-              
-            </div>
-            
-            
-          	
-		
     <?php
 
 }
@@ -280,7 +287,7 @@ if(@$_GET['getlikes']=="ok")
 	);
 
 	$data = array(
-	    "fb_id" => $_GET['id'],
+	    "id" => $_GET['id'],
 	    "status" => 1
 	);
    	$ch = curl_init( $baseurl.'getProfilelikes' );
@@ -297,6 +304,7 @@ if(@$_GET['getlikes']=="ok")
 
 	$curl_error = curl_error($ch);
 	$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+//    var_dump($json_data);die();
     echo '<div>';
 	foreach( $json_data['msg'] as $str => $val ) 
 	{
@@ -338,28 +346,29 @@ if(@$_GET['getdislikes']=="ok")
 	$return = curl_exec($ch);
 
 	$json_data = json_decode($return, true);
-    //var_dump($return);
 
 	$curl_error = curl_error($ch);
 	$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+
     echo '<div';
-	foreach( $json_data['msg'] as $str => $val ) 
+	foreach( $json_data['msg'] as $str => $val )
 	{
         ?>
-                
-            
+
+
                 <div  onclick="ViewProfile('<?php echo $val['profile_info']['fb_id']?>','<?php echo $val['profile_info']['like_count']?>','<?php echo $val['profile_info']['dislike_count']?>');" style="width:110px; cursor: pointer; height:100px; border-radius: 5px; border: solid 1px #8080801f; float:left; padding-top:10px; margin-right: 8px; margin-bottom: 8px;">
                     <img src="<?php echo $val['profile_info']['image1']?>" style="border-radius: 100%; width: 50px; height: 50px;">
                     <h3 style="font-weight:400; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;"><?php echo $val['profile_info']['first_name']?> <?php echo $val['last_name']?></h3>
                 </div>
-                
-                
-             
-           
-    		
+
+
+
+
+
         <?php
-	}    
-	
+	}
+
 	echo '</div> <div style="clear:both;"></div>';
 
 }
@@ -751,9 +760,5 @@ if(@$_GET['startChat']=="ok")
 	
 	
 }
-
-
-
-
 
 ?>

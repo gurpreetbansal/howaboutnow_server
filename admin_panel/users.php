@@ -322,7 +322,7 @@ if( isset($_SESSION['id']))
 					</td>
 					<td style="letter-spacing: 5px;">
 					    <span class="fas fa-info-circle" style="font-size: 20px; color: #46A1B5; cursor: pointer; " onclick="ViewProfile('<?php echo $val['id']; ?>','<?php echo $val['like_count']; ?>','<?php echo $val['dislike_count']; ?>');"></span>
-						<span class="fas fa-heart" style="font-size: 20px; color: #F67A2D; cursor: pointer; " onclick="matchnow('<?php echo $val['fb_id']; ?>')" ></span>
+						<span class="fas fa-heart" style="font-size: 20px; color: #F67A2D; cursor: pointer; " onclick="matchnow('<?php echo $val['id']; ?>')" ></span>
 					</td>
 				</tr>
 				<?php
@@ -500,12 +500,12 @@ if( isset($_SESSION['id']))
             evt.currentTarget.className += " active";
             
             
-            if(cityName==0)
+            if(cityName==1)
             {
                 getlikes(profileID,1);
             }
             else
-            if(cityName==1)
+            if(cityName==0)
             {
                 getdislikes(profileID,0);
             }

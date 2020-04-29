@@ -173,7 +173,15 @@
 	    if($_GET["p"] =="question_list") {
 			questionList();
 		}
-	
+	    if($_GET["p"] =="category_list") {
+			category_list();
+		}
+		if($_GET["p"] =="category_edit") {
+			category_edit();
+		}
+		if($_GET["p"] =="profile_question") {
+			profile_question();
+		}
 	}
 	else
 	{
@@ -1829,12 +1837,12 @@
 					"profile_type" => $rd->profile_type,
 					"like_count" => $rd->like_count,
 					"dislike_count" => $rd->dislike_count,
-					"image1" => isset($rd->image1)&& !empty($rd->image1)?'https://clientstagingdev.com/how_about_now/uploads/'.$rd->id.$rd->image1:'',
-					"image2" => isset($rd->image2)&& !empty($rd->image2)?'https://clientstagingdev.com/how_about_now/uploads/'.$rd->id.$rd->image2:'',
-        			"image3" => isset($rd->image3)&& !empty($rd->image3)?'https://clientstagingdev.com/how_about_now/uploads/'.$rd->id.$rd->image3:'',
-        			"image4" => isset($rd->image4)&& !empty($rd->image4)?'https://clientstagingdev.com/how_about_now/uploads/'.$rd->id.$rd->image4:'',
-        			"image5" => isset($rd->image5)&& !empty($rd->image5)?'https://clientstagingdev.com/how_about_now/uploads/'.$rd->id.$rd->image5:'',
-        			"image6" => isset($rd->image6)&& !empty($rd->image6)?'https://clientstagingdev.com/how_about_now/uploads/'.$rd->id.$rd->image6:'',
+					"image1" => isset($rd->image1)&& !empty($rd->image1)?'https://clientstagingdev.com/how_about_now/uploads/'.$rd->id.'/'.$rd->image1:'',
+					"image2" => isset($rd->image2)&& !empty($rd->image2)?'https://clientstagingdev.com/how_about_now/uploads/'.$rd->id.'/'.$rd->image2:'',
+        			"image3" => isset($rd->image3)&& !empty($rd->image3)?'https://clientstagingdev.com/how_about_now/uploads/'.$rd->id.'/'.$rd->image3:'',
+        			"image4" => isset($rd->image4)&& !empty($rd->image4)?'https://clientstagingdev.com/how_about_now/uploads/'.$rd->id.'/'.$rd->image4:'',
+        			"image5" => isset($rd->image5)&& !empty($rd->image5)?'https://clientstagingdev.com/how_about_now/uploads/'.$rd->id.'/'.$rd->image5:'',
+        			"image6" => isset($rd->image6)&& !empty($rd->image6)?'https://clientstagingdev.com/how_about_now/uploads/'.$rd->id.'/'.$rd->image6:'',
         			"created" => $rd->created
         			);
         		
@@ -1877,43 +1885,100 @@
 	    $event_json = json_decode($input,true);
 		//print_r($event_json);
 		//0= owner  1= company 2= ind mechanic
-		
 		if(isset($event_json['id']) && isset($event_json['status']))
 		{
 			$user_id=htmlspecialchars(strip_tags($event_json['id'] , ENT_QUOTES));
 			$status=htmlspecialchars(strip_tags($event_json['status'] , ENT_QUOTES));
 			
-			
-			$qrry_1="select * from like_unlike WHERE effect_profile ='".$user_id."' and action_type=".$status;
-			$log_in_rs=mysqli_query($conn,$qrry_1);
-			
-			$array_out = array();
-    		while($row=mysqli_fetch_array($log_in_rs))
-    		{
-    		    $qrry_11="select * from users WHERE fb_id ='".$row['action_profile']."' ";
-    			$log_in_rs1=mysqli_query($conn,$qrry_11);
-    			
-    			while($row1=mysqli_fetch_array($log_in_rs1))
-        		{
-        		    
-    		        $array_out[] = 
-    				array(
-    					"action_profile" => $row['action_profile'],
-    					"profile_info" => 
-    					array(
-    					        "id" => $row1['id'],
-    					        "first_name" => $row1['first_name'],
-    					        "image1" => 'https://clientstagingdev.com/how_about_now/uploads'.$row1['id'].'/'.$row1['image1'],
-    					        "last_name" => $row1['last_name'],
-    					        "like_count" => $row1['like_count'],
-    					        "dislike_count" => $row1['dislike_count']
-    					    ),
-    					
-    				);
-    		    
-        		}
-    			
-    		}
+			switch($status) {
+				case 0:
+					$qrry_1="select * from like_unlike WHERE effect_profile ='".$user_id."' and action_type= 0";
+					$log_in_rs=mysqli_query($conn,$qrry_1);
+
+					$array_out = array();
+					while($row=mysqli_fetch_array($log_in_rs))
+					{
+						$qrry_11="select * from users WHERE id ='".$row['action_profile']."' ";
+						$log_in_rs1=mysqli_query($conn,$qrry_11);
+
+						while($row1=mysqli_fetch_array($log_in_rs1))
+						{
+
+							$array_out[] =
+								array(
+									"action_profile" => $row['action_profile'],
+									"profile_info" =>
+										array(
+											"id" => $row1['id'],
+											"first_name" => $row1['first_name'],
+											"image1" => 'https://clientstagingdev.com/how_about_now/uploads/'.$row1['id'].'/'.$row1['image1'],
+											"last_name" => $row1['last_name'],
+											"like_count" => $row1['like_count'],
+											"dislike_count" => $row1['dislike_count']
+										),
+
+								);
+
+						}
+
+					}
+					break;
+				case 1:
+					$qrry_1="select * from like_unlike WHERE (effect_profile ='".$user_id."' or action_profile ='".$user_id."') and action_type= 1";
+					$log_in_rs=mysqli_query($conn,$qrry_1);
+
+					$array_out = array();
+					while($row=mysqli_fetch_array($log_in_rs))
+					{
+						if($row['action_profile'] !== $user_id) {
+							$action_profile = $row['action_profile'];
+							$qrry_11="select * from users WHERE id ='".$row['action_profile']."' ";
+							$log_in_rs1=mysqli_query($conn,$qrry_11);
+							while($row1=mysqli_fetch_array($log_in_rs1))
+							{
+
+								$array_out[] =
+									array(
+										"action_profile" => $action_profile,
+										"profile_info" =>
+											array(
+												"id" => $row1['id'],
+												"first_name" => $row1['first_name'],
+												"image1" => 'https://clientstagingdev.com/how_about_now/uploads/'.$row1['id'].'/'.$row1['image1'],
+												"last_name" => $row1['last_name'],
+												"like_count" => $row1['like_count'],
+												"dislike_count" => $row1['dislike_count']
+											),
+
+									);
+							}
+						} else {
+							$action_profile = $row['effect_profile'];
+							$qrry_11="select * from users WHERE id ='".$row['effect_profile']."' ";
+							$log_in_rs1=mysqli_query($conn,$qrry_11);
+							while($row1=mysqli_fetch_array($log_in_rs1))
+							{
+
+								$array_out[] =
+									array(
+										"action_profile" => $action_profile,
+										"profile_info" =>
+											array(
+												"id" => $row1['id'],
+												"first_name" => $row1['first_name'],
+												"image1" => 'https://clientstagingdev.com/how_about_now/uploads/'.$row1['id'].'/'.$row1['image1'],
+												"last_name" => $row1['last_name'],
+												"like_count" => $row1['like_count'],
+												"dislike_count" => $row1['dislike_count']
+											),
+
+									);
+							}
+						}
+					}
+					break;
+			}
+
     		$output=array( "code" => "200", "msg" => $array_out);
     		print_r(json_encode($output, true));
 			
@@ -1932,7 +1997,97 @@
 		}
 	    
 	}
-	
+
+	function category_list() {
+		require_once("config.php");
+		$input = @file_get_contents("php://input");
+		$event_json = json_decode($input,true);
+
+		$query=mysqli_query($conn,"select * from interest_category");
+
+		$array_out = array();
+		while($row=mysqli_fetch_array($query))
+		{
+			$array_out[] =
+				array(
+					"id" =>$row['id'],
+					"cat_name" => $row['category_name'],
+					"cat_image" => $row['image'],
+					"sort_order" => $row['sort_order']
+				);
+
+		}
+		$output=array( "code" => "200", "msg" => $array_out);
+		print_r(json_encode($output, true));
+
+	}
+
+	function category_edit() {
+		require_once("config.php");
+		$input = @file_get_contents("php://input");
+		$event_json = json_decode($input,true);
+
+		if( isset($event_json['cat_name']) && isset($event_json['cat_id'])) {
+			$cat_name = $event_json['cat_name'];
+			$cat_id = $event_json['cat_id'];
+			$sort_order = $event_json['sort_order'];
+			// Image change
+			if($_FILES['image']['size']> 0) {
+				// upload image
+				$target_path = "../uploads/category_images/";
+				$file_name = $_FILES['image']['name'].'_'.time();
+				$target_path = $target_path . basename($file_name);
+				if (move_uploaded_file($_FILES['image']['tmp_name'], $target_path)) {
+					$image = $file_name;
+					$sql_query = "UPDATE `interest_category` SET category_name='".$cat_name."',image='$image',sort_order=$sort_order WHERE id=".$cat_id;
+				}
+
+
+			} else {
+				$sql_query = "UPDATE `interest_category` SET category_name='".$cat_name."',sort_order=$sort_order WHERE id=".$cat_id;
+			}
+			$query=mysqli_query($conn,$sql_query);
+
+			$array_out = array();
+			array(
+				"response" =>"update successfully");
+			$output=array( "code" => "200", "msg" => $array_out);
+			print_r(json_encode($output, true));
+		} else {
+			$array_out = array();
+
+			$array_out[] =
+				array(
+					"response" =>"Json Parem are missing");
+
+			$output=array( "code" => "201", "msg" => $array_out);
+			print_r(json_encode($output, true));
+		}
+
+
+	}
+
+	function profile_question() {
+		require_once("config.php");
+		$input = @file_get_contents("php://input");
+		$event_json = json_decode($input,true);
+
+		$query=mysqli_query($conn,"select * from question_list");
+
+		$array_out = array();
+		while($row=mysqli_fetch_array($query))
+		{
+			$array_out[] =
+				array(
+					"id" =>$row['id'],
+					"question" => $row['question']
+				);
+
+		}
+		$output=array( "code" => "200", "msg" => $array_out);
+		print_r(json_encode($output, true));
+	}
+
 	function getmatchedprofiles()
 	{
 	    
